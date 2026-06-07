@@ -99,7 +99,7 @@ export default function CreditWidget({ summary, title = 'CREDIT BUDDY', updatedA
     >
       {/* ── Header ── */}
       <div style={{ marginBottom: '12px' }}>
-        <div style={{ fontSize: '9px', color: C.muted, letterSpacing: '0.04em', marginBottom: '2px' }}>
+        <div style={{ fontSize: '9px', color: C.muted, letterSpacing: '0.04em', marginBottom: '2px', fontFamily: 'DOSSaemmul, sans-serif' }}>
           今日も、未来の自分のために。
         </div>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
@@ -126,7 +126,7 @@ export default function CreditWidget({ summary, title = 'CREDIT BUDDY', updatedA
             {new Date().getFullYear()}
           </span>
         </div>
-        <div style={{ fontSize: '9px', color: C.muted, marginTop: '1px' }}>
+        <div style={{ fontSize: '9px', color: C.muted, marginTop: '1px', fontFamily: 'DOSSaemmul, sans-serif' }}>
           캠퍼스 라이프를 정리하는 작은 습관
         </div>
       </div>
@@ -227,7 +227,7 @@ export default function CreditWidget({ summary, title = 'CREDIT BUDDY', updatedA
         }}
       >
         <span style={{ fontSize: '10px' }}>🌱</span>
-        <span style={{ fontSize: '10px', color: C.muted, fontStyle: 'italic' }}>
+        <span style={{ fontSize: '10px', color: C.muted, fontFamily: 'DOSSaemmul, sans-serif' }}>
           {getStatusMessage(remainingCredits)}
         </span>
       </div>

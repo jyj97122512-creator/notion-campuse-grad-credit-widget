@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'DOSSaemmul';
+  src: url('/fonts/DOSSaemmul.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --bg: #E8EDE0;
   --card: #F5F7F1;
