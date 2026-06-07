@@ -4,7 +4,8 @@
 
 @font-face {
   font-family: 'DOSSaemmul';
-  src: url('/fonts/DOSSaemmul.ttf') format('truetype');
+  src: url('/fonts/DOSSaemmul.woff2') format('woff2'),
+       url('/fonts/DOSSaemmul.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -12,7 +13,8 @@
 
 @font-face {
   font-family: 'ChosunGu';
-  src: url('/fonts/ChosunGu.ttf') format('truetype');
+  src: url('/fonts/ChosunGu.woff2') format('woff2'),
+       url('/fonts/ChosunGu.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;

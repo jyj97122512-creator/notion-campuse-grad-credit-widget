@@ -66,9 +66,8 @@ function WidgetContent() {
         style={{
           width: 320,
           minHeight: 240,
-          background: '#FFF8E7',
-          border: '2px solid #2E2E2E',
-          borderRadius: 4,
+          background: '#E8EDE0',
+          borderRadius: 12,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -76,8 +75,8 @@ function WidgetContent() {
           gap: 12,
         }}
       >
-        <span style={{ fontSize: 24 }}>🎓</span>
-        <p style={{ fontSize: 12, color: '#8A8A8A', margin: 0 }}>학점 정보를 불러오는 중…</p>
+        <span style={{ fontSize: 24 }}>🌿</span>
+        <p style={{ fontSize: 12, color: '#7A9170', margin: 0 }}>학점 정보를 불러오는 중…</p>
       </div>
     )
   }
@@ -87,13 +86,12 @@ function WidgetContent() {
       <div
         style={{
           width: 320,
-          background: '#FFF8E7',
-          border: '2px solid #2E2E2E',
-          borderRadius: 4,
+          background: '#E8EDE0',
+          borderRadius: 12,
           padding: 20,
         }}
       >
-        <p style={{ fontSize: 12, color: '#E05252', margin: 0 }}>⚠ {error}</p>
+        <p style={{ fontSize: 12, color: '#8B4040', margin: 0 }}>⚠ {error}</p>
       </div>
     )
   }
