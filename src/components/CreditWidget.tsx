@@ -3,6 +3,13 @@
 import { CreditSummary } from '@/types'
 import { getStatusMessage } from '@/lib/credit-calculator'
 
+// ── 폰트 ──────────────────────────────────────────
+const FONT = {
+  deco: 'DOSSaemmul, sans-serif',  // 꾸밈 — 카피, 서브카피, 상태 메시지
+  data: 'ChosunGu, sans-serif',    // 정보 — 타이틀, 레이블, 숫자, 학점
+}
+
+// ── 색상 ──────────────────────────────────────────
 const C = {
   bg: '#E8EDE0',
   card: '#F5F7F1',
@@ -51,14 +58,20 @@ function StatCard({
       <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '6px' }}>
         <span style={{ fontSize: '13px' }}>{icon}</span>
         <div>
-          <div style={{ fontSize: '10px', fontWeight: 700, color: C.text, lineHeight: 1.2 }}>{label}</div>
-          <div style={{ fontSize: '8px', color: C.muted, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{sublabel}</div>
+          {/* 레이블: 정보 전달 → ChosunGu */}
+          <div style={{ fontSize: '10px', fontWeight: 700, color: C.text, lineHeight: 1.2, fontFamily: FONT.data }}>
+            {label}
+          </div>
+          {/* 영문 서브레이블: 정보 전달 → ChosunGu */}
+          <div style={{ fontSize: '8px', color: C.muted, letterSpacing: '0.06em', textTransform: 'uppercase', fontFamily: FONT.data }}>
+            {sublabel}
+          </div>
         </div>
       </div>
       {/* divider */}
       <div style={{ borderTop: `1px dashed ${C.cardBorder}`, marginBottom: '8px' }} />
-      {/* value */}
-      <div style={{ fontFamily: '"Courier New", monospace', fontWeight: 700, color: C.accentDark, fontSize: '20px', lineHeight: 1 }}>
+      {/* 숫자: 정보 전달 → ChosunGu */}
+      <div style={{ fontFamily: FONT.data, fontWeight: 700, color: C.accentDark, fontSize: '20px', lineHeight: 1 }}>
         {earned}
         {required !== undefined && (
           <span style={{ fontSize: '11px', color: C.mutedLight, fontWeight: 400 }}>
@@ -67,7 +80,7 @@ function StatCard({
         )}
       </div>
       {required !== undefined && (
-        <div style={{ fontSize: '8px', color: C.muted, marginTop: '3px', letterSpacing: '0.04em' }}>
+        <div style={{ fontSize: '8px', color: C.muted, marginTop: '3px', fontFamily: FONT.data }}>
           취득 / 필요
         </div>
       )}
@@ -94,23 +107,18 @@ export default function CreditWidget({ summary, title = 'CREDIT BUDDY', updatedA
         padding: '16px',
         width: '100%',
         maxWidth: '340px',
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif',
+        fontFamily: FONT.data,
       }}
     >
       {/* ── Header ── */}
       <div style={{ marginBottom: '12px' }}>
-        <div style={{ fontSize: '9px', color: C.muted, letterSpacing: '0.04em', marginBottom: '2px', fontFamily: 'DOSSaemmul, sans-serif' }}>
+        {/* 꾸밈 카피 → DOSSaemmul */}
+        <div style={{ fontSize: '9px', color: C.muted, letterSpacing: '0.04em', marginBottom: '2px', fontFamily: FONT.deco }}>
           今日も、未来の自分のために。
         </div>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-          <span
-            style={{
-              fontSize: '18px',
-              fontWeight: 900,
-              color: C.accentDark,
-              letterSpacing: '0.06em',
-            }}
-          >
+          {/* 타이틀 → ChosunGu */}
+          <span style={{ fontSize: '18px', fontWeight: 900, color: C.accentDark, letterSpacing: '0.06em', fontFamily: FONT.data }}>
             {title}
           </span>
           <span
@@ -121,12 +129,14 @@ export default function CreditWidget({ summary, title = 'CREDIT BUDDY', updatedA
               borderRadius: '99px',
               padding: '1px 6px',
               letterSpacing: '0.04em',
+              fontFamily: FONT.data,
             }}
           >
             {new Date().getFullYear()}
           </span>
         </div>
-        <div style={{ fontSize: '9px', color: C.muted, marginTop: '1px', fontFamily: 'DOSSaemmul, sans-serif' }}>
+        {/* 서브카피 → DOSSaemmul */}
+        <div style={{ fontSize: '9px', color: C.muted, marginTop: '1px', fontFamily: FONT.deco }}>
           캠퍼스 라이프를 정리하는 작은 습관
         </div>
       </div>
@@ -143,39 +153,27 @@ export default function CreditWidget({ summary, title = 'CREDIT BUDDY', updatedA
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
           <div>
-            <div style={{ fontSize: '11px', color: C.muted, marginBottom: '2px' }}>졸업까지</div>
-            <div style={{ fontSize: '20px', fontWeight: 800, color: C.accentDark, lineHeight: 1 }}>
+            {/* "졸업까지" 레이블 → ChosunGu */}
+            <div style={{ fontSize: '11px', color: C.muted, marginBottom: '2px', fontFamily: FONT.data }}>졸업까지</div>
+            <div style={{ fontSize: '20px', fontWeight: 800, color: C.accentDark, lineHeight: 1, fontFamily: FONT.data }}>
               {remainingCredits}
               <span style={{ fontSize: '12px', fontWeight: 600, color: C.muted }}> 학점 남았어요!</span>
             </div>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '8px', color: C.muted, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+            {/* GRADUATION PROGRESS 레이블 → ChosunGu */}
+            <div style={{ fontSize: '8px', color: C.muted, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: FONT.data }}>
               GRADUATION PROGRESS
             </div>
-            <div
-              style={{
-                fontSize: '26px',
-                fontWeight: 700,
-                fontFamily: '"Courier New", monospace',
-                color: C.accentMid,
-                lineHeight: 1,
-              }}
-            >
+            {/* % 숫자 → ChosunGu */}
+            <div style={{ fontSize: '26px', fontWeight: 700, fontFamily: FONT.data, color: C.accentMid, lineHeight: 1 }}>
               {pct}%
             </div>
           </div>
         </div>
         {/* Progress bar */}
         <div style={{ position: 'relative' }}>
-          <div
-            style={{
-              height: '10px',
-              background: C.progressBg,
-              borderRadius: '2px',
-              overflow: 'hidden',
-            }}
-          >
+          <div style={{ height: '10px', background: C.progressBg, borderRadius: '2px', overflow: 'hidden' }}>
             <div
               className="progress-fill"
               style={
@@ -189,10 +187,10 @@ export default function CreditWidget({ summary, title = 'CREDIT BUDDY', updatedA
               }
             />
           </div>
-          {/* markers */}
+          {/* 마커 → ChosunGu */}
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '3px' }}>
             {['0%', '50%', '100%'].map((m) => (
-              <span key={m} style={{ fontSize: '7px', color: C.mutedLight }}>{m}</span>
+              <span key={m} style={{ fontSize: '7px', color: C.mutedLight, fontFamily: FONT.data }}>{m}</span>
             ))}
           </div>
         </div>
@@ -213,7 +211,7 @@ export default function CreditWidget({ summary, title = 'CREDIT BUDDY', updatedA
         />
       </div>
 
-      {/* ── Status message ── */}
+      {/* ── Status message (꾸밈) → DOSSaemmul ── */}
       <div
         style={{
           background: C.card,
@@ -227,7 +225,7 @@ export default function CreditWidget({ summary, title = 'CREDIT BUDDY', updatedA
         }}
       >
         <span style={{ fontSize: '10px' }}>🌱</span>
-        <span style={{ fontSize: '10px', color: C.muted, fontFamily: 'DOSSaemmul, sans-serif' }}>
+        <span style={{ fontSize: '10px', color: C.muted, fontFamily: FONT.deco }}>
           {getStatusMessage(remainingCredits)}
         </span>
       </div>
@@ -244,16 +242,18 @@ export default function CreditWidget({ summary, title = 'CREDIT BUDDY', updatedA
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-          <span style={{ fontSize: '9px', color: C.footerText, opacity: 0.7, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+          {/* LAST UPDATED → ChosunGu */}
+          <span style={{ fontSize: '9px', color: C.footerText, opacity: 0.7, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: FONT.data }}>
             Last Updated
           </span>
           {updatedAt && (
-            <span style={{ fontSize: '9px', color: C.footerText, fontFamily: '"Courier New", monospace' }}>
+            <span style={{ fontSize: '9px', color: C.footerText, fontFamily: FONT.data }}>
               {new Date(updatedAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })} 기준
             </span>
           )}
         </div>
-        <span style={{ fontSize: '8px', color: C.footerText, opacity: 0.6, letterSpacing: '0.06em' }}>
+        {/* 꾸밈 문구 → DOSSaemmul */}
+        <span style={{ fontSize: '8px', color: C.footerText, opacity: 0.6, letterSpacing: '0.06em', fontFamily: FONT.deco }}>
           EVERY DAY IS A STEP FORWARD.
         </span>
       </div>
