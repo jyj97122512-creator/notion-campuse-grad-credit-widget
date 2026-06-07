@@ -3,14 +3,11 @@
 @tailwind utilities;
 
 :root {
-  --bg: #FFF8E7;
-  --card: #FFFFFF;
-  --border: #2E2E2E;
-  --main: #6B8ECA;
-  --accent: #F4A7B9;
-  --text: #2B2B2B;
-  --muted: #8A8A8A;
-  --progress-empty: #E8E1D3;
+  --bg: #B7C3A5;
+  --card: #DDE5D4;
+  --accent: #6E8A63;
+  --text: #364033;
+  --muted: #5A6E55;
 }
 
 * {
@@ -20,11 +17,10 @@
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
-/* 위젯 전용 – iframe 내 배경 투명 처리 */
 .widget-root {
   background: transparent;
   min-height: 100vh;
@@ -34,12 +30,11 @@ body {
   padding: 0;
 }
 
-/* 픽셀 느낌의 progress bar 애니메이션 */
 @keyframes fillBar {
   from { width: 0%; }
   to   { width: var(--target-width); }
 }
 
 .progress-fill {
-  animation: fillBar 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: fillBar 0.9s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
