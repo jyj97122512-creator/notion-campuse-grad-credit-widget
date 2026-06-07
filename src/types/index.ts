@@ -23,9 +23,17 @@ export type CreditSummary = {
   currentSemester?: { name: string; gpa: number | null }
 }
 
+export type CardImages = {
+  total?: string
+  major?: string
+  liberal?: string
+  gpa?: string
+}
+
 export type WidgetConfig = {
   apiKey: string
   graduationDbId: string
   semesterDbId: string
   title?: string
+  images?: CardImages
 }

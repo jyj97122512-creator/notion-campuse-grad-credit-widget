@@ -13,8 +13,9 @@ function WidgetContent() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
   const [title, setTitle] = useState('Credit Buddy')
+  const [config, setConfig] = useState<{ images?: { total?: string; major?: string; liberal?: string; gpa?: string } }>({})
 
-  const fetchData = useCallback(async (config: { k: string; g: string; s: string; t?: string }) => {
+  const fetchData = useCallback(async (cfg: { k: string; g: string; s: string; t?: string; images?: Record<string, string> }) => {
     setLoading(true)
     setError('')
     try {
@@ -22,16 +23,17 @@ function WidgetContent() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          apiKey: config.k,
-          graduationDbId: config.g,
-          semesterDbId: config.s,
+          apiKey: cfg.k,
+          graduationDbId: cfg.g,
+          semesterDbId: cfg.s,
         }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
       setSummary(data.summary)
       setUpdatedAt(data.updatedAt)
-      if (config.t) setTitle(config.t)
+      if (cfg.t) setTitle(cfg.t)
+      if (cfg.images) setConfig({ images: cfg.images as any })
     } catch (e: any) {
       setError(e.message ?? '데이터를 불러오지 못했습니다.')
     } finally {
@@ -98,7 +100,7 @@ function WidgetContent() {
 
   if (!summary) return null
 
-  return <CreditWidget summary={summary} title={title} updatedAt={updatedAt} />
+  return <CreditWidget summary={summary} title={title} updatedAt={updatedAt} images={config?.images} />
 }
 
 export default function WidgetPage() {
