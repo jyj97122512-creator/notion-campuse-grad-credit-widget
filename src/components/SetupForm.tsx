@@ -135,7 +135,7 @@ function PropSelect({ label, hint, properties, value, onChange, optional = false
         {optional && <option value="">— 사용 안 함 —</option>}
         {!optional && <option value="">— 선택하세요 —</option>}
         {filtered.map(p => (
-          <option key={p.id} value={p.name}>{p.name} ({p.type})</option>
+          <option key={p.id} value={p.name}>{p.name}</option>
         ))}
       </select>
     </div>
