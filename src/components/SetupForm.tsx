@@ -230,9 +230,7 @@ export default function SetupForm({ onSuccess }: { onSuccess: (embedUrl: string)
 
   // ── Step 2: 매핑 확인 → configId 생성 ────────────
   async function handleGenerate() {
-    if (!gradMapping.categoryProp)      { setError('졸업요건 DB의 구분/카테고리 속성을 선택해주세요.'); return }
-    if (!gradMapping.requiredCreditsProp) { setError('졸업요건 DB의 필요 학점 속성을 선택해주세요.'); return }
-    if (!gradMapping.earnedCreditsProp)   { setError('졸업요건 DB의 이수 학점 속성을 선택해주세요.'); return }
+    if (!gradMapping.earnedCreditsProp) { setError('졸업요건 DB의 이수 학점 속성을 선택해주세요.'); return }
     if (!semMapping.statusProp)           { setError('학기 DB의 진행 상태 속성을 선택해주세요.'); return }
     setLoading(true); setError('')
     try {
@@ -312,24 +310,8 @@ export default function SetupForm({ onSuccess }: { onSuccess: (embedUrl: string)
           <div style={{ border: `1px solid ${C.border}`, borderRadius: '8px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <SectionTitle>졸업요건 DB 속성</SectionTitle>
             <PropSelect
-              label="구분 / 카테고리"
-              hint="전공·교양 등 학점 분류를 담은 속성"
-              properties={gradProps}
-              value={gradMapping.categoryProp}
-              onChange={v => setGradMapping(m => ({ ...m, categoryProp: v }))}
-              filterTypes={['select', 'multi_select']}
-            />
-            <PropSelect
-              label="필요 학점"
-              hint="각 요건의 이수 필요 학점 (숫자)"
-              properties={gradProps}
-              value={gradMapping.requiredCreditsProp}
-              onChange={v => setGradMapping(m => ({ ...m, requiredCreditsProp: v }))}
-              filterTypes={['number']}
-            />
-            <PropSelect
               label="이수 학점"
-              hint="실제 취득한 학점 (숫자, 롤업, 수식)"
+              hint="실제 취득한 학점 — 수강 기록과 연결된 롤업·수식 속성"
               properties={gradProps}
               value={gradMapping.earnedCreditsProp}
               onChange={v => setGradMapping(m => ({ ...m, earnedCreditsProp: v }))}
