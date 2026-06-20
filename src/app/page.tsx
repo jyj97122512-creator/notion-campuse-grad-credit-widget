@@ -32,6 +32,7 @@ export default function SetupPage() {
       flexDirection: 'column',
       alignItems: 'center',
       gap: '36px',
+      background: '#F8FAF6',
     }}>
       {/* Hero */}
       <div style={{ textAlign: 'center', maxWidth: '480px' }}>
