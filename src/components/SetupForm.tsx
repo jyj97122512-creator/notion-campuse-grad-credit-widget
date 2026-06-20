@@ -7,13 +7,11 @@ import { DatabaseInfo, PropertyInfo, GradDbMapping, SemDbMapping } from '@/types
 const C = {
   bg: '#F5F7F1',
   border: '#C8D4BC',
-  borderDark: '#8FAE83',
   accent: '#4A6640',
   accentMid: '#6B8A5E',
   accentLight: '#A8BC98',
   text: '#2E3B28',
   muted: '#7A9170',
-  mutedLight: '#9AAD8E',
   card: '#FFFFFF',
   error: '#8B4040',
   errorBg: '#FDF0F0',
@@ -22,62 +20,36 @@ const C = {
   step: '#D4DCC8',
 }
 
-// ── 공통 스타일 ────────────────────────────────────
 const inputStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '10px 12px',
-  border: `1.5px solid ${C.border}`,
-  borderRadius: '6px',
-  fontSize: '13px',
-  background: C.card,
-  color: C.text,
-  outline: 'none',
-  boxSizing: 'border-box',
-  fontFamily: 'inherit',
+  width: '100%', padding: '10px 12px', border: `1.5px solid ${C.border}`,
+  borderRadius: '6px', fontSize: '13px', background: C.card, color: C.text,
+  outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit',
 }
 
 const labelStyle: React.CSSProperties = {
-  display: 'block',
-  fontSize: '11px',
-  fontWeight: 700,
-  color: C.accent,
-  letterSpacing: '0.06em',
-  marginBottom: '5px',
+  display: 'block', fontSize: '11px', fontWeight: 700, color: C.accent,
+  letterSpacing: '0.06em', marginBottom: '5px',
 }
 
 const btnPrimary: React.CSSProperties = {
-  width: '100%',
-  padding: '11px',
-  background: C.accentMid,
-  color: '#fff',
-  border: 'none',
-  borderRadius: '6px',
-  fontSize: '13px',
-  fontWeight: 700,
-  cursor: 'pointer',
-  letterSpacing: '0.04em',
+  width: '100%', padding: '11px', background: C.accentMid, color: '#fff',
+  border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 700,
+  cursor: 'pointer', letterSpacing: '0.04em',
 }
 
 const btnSecondary: React.CSSProperties = {
-  padding: '8px 14px',
-  background: 'transparent',
-  color: C.muted,
-  border: `1.5px solid ${C.border}`,
-  borderRadius: '6px',
-  fontSize: '12px',
-  cursor: 'pointer',
+  padding: '8px 14px', background: 'transparent', color: C.muted,
+  border: `1.5px solid ${C.border}`, borderRadius: '6px', fontSize: '12px', cursor: 'pointer',
 }
 
 const selectStyle: React.CSSProperties = {
   ...inputStyle,
   appearance: 'none',
   backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%237A9170' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E")`,
-  backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'right 10px center',
-  paddingRight: '28px',
+  backgroundRepeat: 'no-repeat', backgroundPosition: 'right 10px center', paddingRight: '28px',
 }
 
-// ── 자동 탐색 키워드 ──────────────────────────────
+// ── DB 자동 감지 ──────────────────────────────────
 const GRAD_KEYWORDS = ['졸업', '요건', 'graduation', 'requirement']
 const SEM_KEYWORDS  = ['학기', 'semester', 'term']
 
@@ -88,50 +60,34 @@ function autoDetectDb(databases: DatabaseInfo[]) {
   return { grad: grad ?? null, sem: sem ?? null }
 }
 
+// ── 속성 자동 감지 ────────────────────────────────
 function autoDetectGradMapping(props: PropertyInfo[]): GradDbMapping {
   const find = (types: string[], keywords: string[]) =>
-    props.find(p =>
-      types.includes(p.type) &&
-      keywords.some(k => p.name.toLowerCase().includes(k))
-    )?.name ?? ''
-
-  const titleProp = props.find(p => p.type === 'title')?.name ?? ''
-  const categoryProp = find(['select', 'multi_select'], ['구분', '분류', 'category', 'type'])
-  const requiredProp = find(['number'], ['필요', 'required', '기준', '이수필요'])
-  const earnedProp = find(['number', 'rollup', 'formula'], ['이수', '취득', 'earned', 'completed', '완료'])
-
+    props.find(p => types.includes(p.type) && keywords.some(k => p.name.toLowerCase().includes(k)))?.name ?? ''
   return {
-    nameProp: titleProp,
-    categoryProp,
-    requiredCreditsProp: requiredProp,
-    earnedCreditsProp: earnedProp,
+    nameProp: props.find(p => p.type === 'title')?.name ?? '',
+    categoryProp: find(['select', 'multi_select'], ['구분', '분류', 'category', 'type']),
+    requiredCreditsProp: find(['number'], ['필요', 'required', '기준', '이수필요']),
+    earnedCreditsProp: find(['number', 'rollup', 'formula'], ['이수', '취득', 'earned', 'completed', '완료']),
   }
 }
 
 function autoDetectSemMapping(props: PropertyInfo[]): SemDbMapping {
   const find = (types: string[], keywords: string[]) =>
-    props.find(p =>
-      types.includes(p.type) &&
-      keywords.some(k => p.name.toLowerCase().includes(k))
-    )?.name ?? ''
-
-  const titleProp = props.find(p => p.type === 'title')?.name ?? ''
-  const statusProp = find(['status', 'select'], ['상태', 'status'])
-  const gpaProp = find(['number', 'formula'], ['평점', 'gpa', '학점평균']) || null
-
+    props.find(p => types.includes(p.type) && keywords.some(k => p.name.toLowerCase().includes(k)))?.name ?? ''
   return {
-    nameProp: titleProp,
-    statusProp,
+    nameProp: props.find(p => p.type === 'title')?.name ?? '',
+    statusProp: find(['status', 'select'], ['상태', 'status']),
     currentStatusValue: '진행 중',
-    gpaProp,
+    gpaProp: find(['number', 'formula'], ['평점', 'gpa', '학점평균']) || null,
   }
 }
 
-// ── 단계 표시기 ──────────────────────────────────
-function StepIndicator({ current }: { current: 1 | 2 | 3 | 4 }) {
-  const steps = ['Notion 연결', 'DB 선택', '속성 매핑', '완료']
+// ── 단계 표시기 (3단계) ────────────────────────────
+function StepIndicator({ current }: { current: 1 | 2 | 3 }) {
+  const steps = ['Notion 연결', '속성 설정', '완료']
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '0', marginBottom: '24px' }}>
+    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '24px' }}>
       {steps.map((label, i) => {
         const n = i + 1
         const done = n < current
@@ -162,24 +118,6 @@ function StepIndicator({ current }: { current: 1 | 2 | 3 | 4 }) {
   )
 }
 
-// ── DB 드롭다운 ──────────────────────────────────
-function DbSelect({ label, hint, databases, value, onChange }: {
-  label: string; hint?: string; databases: DatabaseInfo[]; value: string; onChange: (id: string) => void
-}) {
-  return (
-    <div>
-      <label style={labelStyle}>{label}</label>
-      {hint && <p style={{ fontSize: '10px', color: C.muted, margin: '0 0 5px' }}>{hint}</p>}
-      <select value={value} onChange={e => onChange(e.target.value)} style={selectStyle}>
-        <option value="">— 선택하세요 —</option>
-        {databases.map(db => (
-          <option key={db.id} value={db.id}>{db.title}</option>
-        ))}
-      </select>
-    </div>
-  )
-}
-
 // ── 속성 드롭다운 ──────────────────────────────────
 function PropSelect({ label, hint, properties, value, onChange, optional = false, filterTypes }: {
   label: string; hint?: string; properties: PropertyInfo[]; value: string
@@ -197,7 +135,7 @@ function PropSelect({ label, hint, properties, value, onChange, optional = false
         {optional && <option value="">— 사용 안 함 —</option>}
         {!optional && <option value="">— 선택하세요 —</option>}
         {filtered.map(p => (
-          <option key={p.id} value={p.name}>{p.name} <span style={{ color: C.muted }}>({p.type})</span></option>
+          <option key={p.id} value={p.name}>{p.name} ({p.type})</option>
         ))}
       </select>
     </div>
@@ -212,19 +150,16 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   )
 }
 
-// ── Props ──────────────────────────────────────────
-interface Props {
-  onSuccess: (embedUrl: string) => void
-}
-
 // ════════════════════════════════════════════════════
-export default function SetupForm({ onSuccess }: Props) {
-  const [step, setStep] = useState<1 | 2 | 3 | 4>(1)
+export default function SetupForm({ onSuccess }: { onSuccess: (embedUrl: string) => void }) {
+  const [step, setStep] = useState<1 | 2 | 3>(1)
   const [apiKey, setApiKey] = useState('')
-  const [databases, setDatabases] = useState<DatabaseInfo[]>([])
+  const [title, setTitle] = useState('Credit Buddy')
+
   const [graduationDbId, setGraduationDbId] = useState('')
   const [semesterDbId, setSemesterDbId] = useState('')
-  const [title, setTitle] = useState('Credit Buddy')
+  const [gradDbTitle, setGradDbTitle] = useState('')
+  const [semDbTitle, setSemDbTitle] = useState('')
 
   const [gradProps, setGradProps] = useState<PropertyInfo[]>([])
   const [semProps, setSemProps] = useState<PropertyInfo[]>([])
@@ -236,23 +171,55 @@ export default function SetupForm({ onSuccess }: Props) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  // ── Step 1: API Key → DB 목록 ─────────────────────
+  // ── Step 1: API Key → DB 자동 감지 → 속성 로드 ────
   async function handleConnect() {
     if (!apiKey.trim()) { setError('Notion API 키를 입력해주세요.'); return }
     setLoading(true); setError('')
     try {
-      const res = await fetch('/api/notion/databases', {
+      // DB 목록 조회
+      const dbRes = await fetch('/api/notion/databases', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ apiKey: apiKey.trim() }),
       })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error)
-      const dbs: DatabaseInfo[] = data.databases
-      setDatabases(dbs)
+      const dbData = await dbRes.json()
+      if (!dbRes.ok) throw new Error(dbData.error)
+
+      const dbs: DatabaseInfo[] = dbData.databases
       const { grad, sem } = autoDetectDb(dbs)
-      if (grad) setGraduationDbId(grad.id)
-      if (sem) setSemesterDbId(sem.id)
+
+      if (!grad) throw new Error('졸업요건 DB를 찾지 못했습니다. DB 이름에 "졸업" 또는 "요건"이 포함되어 있어야 해요.')
+      if (!sem)  throw new Error('학기 DB를 찾지 못했습니다. DB 이름에 "학기" 또는 "semester"가 포함되어 있어야 해요.')
+
+      setGraduationDbId(grad.id)
+      setSemesterDbId(sem.id)
+      setGradDbTitle(grad.title)
+      setSemDbTitle(sem.title)
+
+      // 두 DB 속성 동시 조회
+      const [gradRes, semRes] = await Promise.all([
+        fetch('/api/notion/properties', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ apiKey: apiKey.trim(), dbId: grad.id }),
+        }),
+        fetch('/api/notion/properties', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ apiKey: apiKey.trim(), dbId: sem.id }),
+        }),
+      ])
+      const gradPropData = await gradRes.json()
+      const semPropData = await semRes.json()
+      if (!gradRes.ok) throw new Error(gradPropData.error)
+      if (!semRes.ok)  throw new Error(semPropData.error)
+
+      const gProps: PropertyInfo[] = gradPropData.properties
+      const sProps: PropertyInfo[] = semPropData.properties
+      setGradProps(gProps)
+      setSemProps(sProps)
+      setGradMapping(autoDetectGradMapping(gProps))
+      setSemMapping(autoDetectSemMapping(sProps))
       setStep(2)
     } catch (e: any) {
       setError(e.message ?? '연결에 실패했습니다.')
@@ -261,49 +228,12 @@ export default function SetupForm({ onSuccess }: Props) {
     }
   }
 
-  // ── Step 2: DB 선택 → 속성 목록 로드 ──────────────
-  async function handleLoadProperties() {
-    if (!graduationDbId) { setError('졸업요건 DB를 선택해주세요.'); return }
-    if (!semesterDbId)   { setError('학기 DB를 선택해주세요.'); return }
-    setLoading(true); setError('')
-    try {
-      const [gradRes, semRes] = await Promise.all([
-        fetch('/api/notion/properties', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ apiKey: apiKey.trim(), dbId: graduationDbId }),
-        }),
-        fetch('/api/notion/properties', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ apiKey: apiKey.trim(), dbId: semesterDbId }),
-        }),
-      ])
-      const gradData = await gradRes.json()
-      const semData = await semRes.json()
-      if (!gradRes.ok) throw new Error(gradData.error)
-      if (!semRes.ok) throw new Error(semData.error)
-
-      const gProps: PropertyInfo[] = gradData.properties
-      const sProps: PropertyInfo[] = semData.properties
-      setGradProps(gProps)
-      setSemProps(sProps)
-      setGradMapping(autoDetectGradMapping(gProps))
-      setSemMapping(autoDetectSemMapping(sProps))
-      setStep(3)
-    } catch (e: any) {
-      setError(e.message ?? '속성 목록을 불러오지 못했습니다.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // ── Step 3: 매핑 → configId 생성 ─────────────────
+  // ── Step 2: 매핑 확인 → configId 생성 ────────────
   async function handleGenerate() {
-    if (!gradMapping.categoryProp) { setError('졸업요건 DB의 구분/카테고리 속성을 선택해주세요.'); return }
+    if (!gradMapping.categoryProp)      { setError('졸업요건 DB의 구분/카테고리 속성을 선택해주세요.'); return }
     if (!gradMapping.requiredCreditsProp) { setError('졸업요건 DB의 필요 학점 속성을 선택해주세요.'); return }
-    if (!gradMapping.earnedCreditsProp) { setError('졸업요건 DB의 이수 학점 속성을 선택해주세요.'); return }
-    if (!semMapping.statusProp) { setError('학기 DB의 진행 상태 속성을 선택해주세요.'); return }
+    if (!gradMapping.earnedCreditsProp)   { setError('졸업요건 DB의 이수 학점 속성을 선택해주세요.'); return }
+    if (!semMapping.statusProp)           { setError('학기 DB의 진행 상태 속성을 선택해주세요.'); return }
     setLoading(true); setError('')
     try {
       const res = await fetch('/api/configs', {
@@ -315,7 +245,7 @@ export default function SetupForm({ onSuccess }: Props) {
       if (!res.ok) throw new Error(data.error)
       const url = `${window.location.origin}/widget?config=${data.configId}`
       setEmbedUrl(url)
-      setStep(4)
+      setStep(3)
       onSuccess(url)
     } catch (e: any) {
       setError(e.message ?? 'URL 생성에 실패했습니다.')
@@ -330,10 +260,8 @@ export default function SetupForm({ onSuccess }: Props) {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const { grad: autoGrad, sem: autoSem } = databases.length ? autoDetectDb(databases) : { grad: null, sem: null }
-
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
       <StepIndicator current={step} />
 
       {/* ── STEP 1 ── */}
@@ -345,75 +273,42 @@ export default function SetupForm({ onSuccess }: Props) {
               style={{ color: C.accentMid, textDecoration: 'underline' }}>
               notion.so/my-integrations
             </a>
-            {' '}에서 새 통합을 만들고, 졸업요건 DB와 학기 DB에 연결 권한을 부여한 뒤 API 키를 붙여넣으세요.
+            {' '}에서 통합을 만들고, 졸업요건 DB와 학기 DB에 연결 권한을 부여한 뒤 API 키를 붙여넣으세요.
           </div>
           <div>
             <label style={labelStyle}>Notion API 키</label>
             <input
-              style={inputStyle}
-              type="password"
-              placeholder="secret_xxxxxxxxxxxxxxxxxxxx"
-              value={apiKey}
-              onChange={e => { setApiKey(e.target.value); setError('') }}
-              onKeyDown={e => e.key === 'Enter' && handleConnect()}
-              autoComplete="off"
+              style={inputStyle} type="password" placeholder="secret_xxxxxxxxxxxxxxxxxxxx"
+              value={apiKey} onChange={e => { setApiKey(e.target.value); setError('') }}
+              onKeyDown={e => e.key === 'Enter' && handleConnect()} autoComplete="off"
             />
+          </div>
+          <div>
+            <label style={labelStyle}>위젯 제목 (선택)</label>
+            <input style={inputStyle} type="text" placeholder="Credit Buddy"
+              value={title} onChange={e => setTitle(e.target.value)} />
           </div>
           {error && <ErrorBox msg={error} />}
           <button onClick={handleConnect} disabled={loading} style={{ ...btnPrimary, opacity: loading ? 0.6 : 1 }}>
-            {loading ? '연결 확인 중…' : 'Notion 연결하기'}
+            {loading ? 'DB 연결 중…' : 'Notion 연결하기'}
           </button>
         </div>
       )}
 
       {/* ── STEP 2 ── */}
       {step === 2 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {(autoGrad || autoSem) && (
-            <div style={{ background: C.successBg, border: `1px solid ${C.accentLight}`, borderRadius: '8px', padding: '10px 14px', fontSize: '11px', color: C.success }}>
-              ✓ DB를 자동으로 찾았어요. 확인 후 다음 단계로 이동하세요.
-            </div>
-          )}
-          <DbSelect
-            label="졸업요건 DB"
-            hint={autoGrad ? `자동 감지: ${autoGrad.title}` : undefined}
-            databases={databases}
-            value={graduationDbId}
-            onChange={id => { setGraduationDbId(id); setError('') }}
-          />
-          <DbSelect
-            label="학기 DB"
-            hint={autoSem ? `자동 감지: ${autoSem.title}` : undefined}
-            databases={databases}
-            value={semesterDbId}
-            onChange={id => { setSemesterDbId(id); setError('') }}
-          />
-          <div>
-            <label style={labelStyle}>위젯 제목 (선택)</label>
-            <input
-              style={inputStyle}
-              type="text"
-              placeholder="Credit Buddy"
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-            />
-          </div>
-          {error && <ErrorBox msg={error} />}
-          <button onClick={handleLoadProperties} disabled={loading} style={{ ...btnPrimary, opacity: loading ? 0.6 : 1 }}>
-            {loading ? '속성 불러오는 중…' : '다음 — 속성 설정'}
-          </button>
-          <button onClick={() => { setStep(1); setError('') }} style={btnSecondary}>← 이전으로</button>
-        </div>
-      )}
-
-      {/* ── STEP 3 ── */}
-      {step === 3 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <div style={{ background: C.bg, borderRadius: '8px', padding: '10px 14px', fontSize: '11px', color: C.muted, lineHeight: 1.6 }}>
+          {/* 감지된 DB 표시 */}
+          <div style={{ background: C.successBg, border: `1px solid ${C.accentLight}`, borderRadius: '8px', padding: '10px 14px', fontSize: '11px', color: C.success, lineHeight: 1.7 }}>
+            ✓ DB 자동 감지 완료<br />
+            <span style={{ color: C.muted }}>졸업요건: <strong style={{ color: C.text }}>{gradDbTitle}</strong> · 학기: <strong style={{ color: C.text }}>{semDbTitle}</strong></span>
+          </div>
+
+          <div style={{ fontSize: '11px', color: C.muted, lineHeight: 1.6, padding: '0 2px' }}>
             각 DB에서 위젯에 표시할 속성을 선택해주세요. 자동으로 감지된 속성은 미리 선택되어 있어요.
           </div>
 
-          {/* 졸업요건 DB 매핑 */}
+          {/* 졸업요건 DB */}
           <div style={{ border: `1px solid ${C.border}`, borderRadius: '8px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <SectionTitle>졸업요건 DB 속성</SectionTitle>
             <PropSelect
@@ -442,7 +337,7 @@ export default function SetupForm({ onSuccess }: Props) {
             />
           </div>
 
-          {/* 학기 DB 매핑 */}
+          {/* 학기 DB */}
           <div style={{ border: `1px solid ${C.border}`, borderRadius: '8px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <SectionTitle>학기 DB 속성</SectionTitle>
             <PropSelect
@@ -456,13 +351,9 @@ export default function SetupForm({ onSuccess }: Props) {
             <div>
               <label style={labelStyle}>진행 중 상태값</label>
               <p style={{ fontSize: '10px', color: C.muted, margin: '0 0 5px' }}>위 속성에서 "현재 학기"를 나타내는 값</p>
-              <input
-                style={inputStyle}
-                type="text"
-                placeholder="진행 중"
+              <input style={inputStyle} type="text" placeholder="진행 중"
                 value={semMapping.currentStatusValue}
-                onChange={e => setSemMapping(m => ({ ...m, currentStatusValue: e.target.value }))}
-              />
+                onChange={e => setSemMapping(m => ({ ...m, currentStatusValue: e.target.value }))} />
             </div>
             <PropSelect
               label="학기 평점"
@@ -478,12 +369,12 @@ export default function SetupForm({ onSuccess }: Props) {
           <button onClick={handleGenerate} disabled={loading} style={{ ...btnPrimary, opacity: loading ? 0.6 : 1 }}>
             {loading ? '위젯 URL 생성 중…' : '위젯 만들기'}
           </button>
-          <button onClick={() => { setStep(2); setError('') }} style={btnSecondary}>← 이전으로</button>
+          <button onClick={() => { setStep(1); setError('') }} style={btnSecondary}>← 이전으로</button>
         </div>
       )}
 
-      {/* ── STEP 4 ── */}
-      {step === 4 && (
+      {/* ── STEP 3 ── */}
+      {step === 3 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div style={{ background: C.successBg, border: `1px solid ${C.accentLight}`, borderRadius: '8px', padding: '14px', fontSize: '12px', color: C.success, lineHeight: 1.6 }}>
             <strong style={{ display: 'block', marginBottom: '4px' }}>✓ 위젯이 준비됐어요!</strong>
@@ -510,7 +401,7 @@ export default function SetupForm({ onSuccess }: Props) {
             2. URL 붙여넣기 → Embed link 클릭<br />
             3. 위젯 크기를 원하는 대로 조절
           </div>
-          <button onClick={() => { setStep(3); setError('') }} style={btnSecondary}>← 속성 다시 설정</button>
+          <button onClick={() => { setStep(2); setError('') }} style={btnSecondary}>← 속성 다시 설정</button>
         </div>
       )}
     </div>
