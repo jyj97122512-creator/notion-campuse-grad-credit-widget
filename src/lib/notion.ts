@@ -1,8 +1,22 @@
 import { Client } from '@notionhq/client'
-import { GraduationRequirement, Semester } from '@/types'
+import { GraduationRequirement, Semester, DatabaseInfo } from '@/types'
 
 function getClient(apiKey: string) {
   return new Client({ auth: apiKey })
+}
+
+export async function listDatabases(apiKey: string): Promise<DatabaseInfo[]> {
+  const notion = getClient(apiKey)
+  const res = await notion.search({
+    filter: { property: 'object', value: 'database' },
+    page_size: 50,
+  })
+  return res.results
+    .filter((r: any) => r.object === 'database')
+    .map((db: any) => ({
+      id: db.id,
+      title: db.title?.[0]?.plain_text ?? '(제목 없음)',
+    }))
 }
 
 function getProp(props: Record<string, any>, key: string) {
