@@ -1,5 +1,5 @@
 import { Client } from '@notionhq/client'
-import { GraduationRequirement, Semester, DatabaseInfo } from '@/types'
+import { GraduationRequirement, Semester, DatabaseInfo, PropertyInfo, GradDbMapping, SemDbMapping } from '@/types'
 
 function getClient(apiKey: string) {
   return new Client({ auth: apiKey })
@@ -19,13 +19,61 @@ export async function listDatabases(apiKey: string): Promise<DatabaseInfo[]> {
     }))
 }
 
-function getProp(props: Record<string, any>, key: string) {
-  return props[key]
+export async function listDbProperties(apiKey: string, dbId: string): Promise<PropertyInfo[]> {
+  const notion = getClient(apiKey)
+  const db = await notion.databases.retrieve({ database_id: dbId }) as any
+  return Object.values(db.properties).map((p: any) => ({
+    id: p.id,
+    name: p.name,
+    type: p.type,
+  }))
+}
+
+function getPropValue(props: Record<string, any>, propName: string): any {
+  return props[propName]
+}
+
+function readText(prop: any): string {
+  if (!prop) return ''
+  if (prop.title) return prop.title?.[0]?.plain_text ?? ''
+  if (prop.rich_text) return prop.rich_text?.[0]?.plain_text ?? ''
+  return ''
+}
+
+function readSelect(prop: any): string {
+  if (!prop) return ''
+  if (prop.select) return prop.select?.name ?? ''
+  if (prop.multi_select) return prop.multi_select?.[0]?.name ?? ''
+  if (prop.status) return prop.status?.name ?? ''
+  return ''
+}
+
+function readNumber(prop: any): number {
+  if (!prop) return 0
+  if (prop.number !== undefined && prop.number !== null) return prop.number
+  if (prop.rollup?.number !== undefined) return prop.rollup.number
+  if (prop.formula?.number !== undefined) return prop.formula.number
+  return 0
+}
+
+// 하드코딩 fallback (레거시 configId 호환)
+const DEFAULT_GRAD: GradDbMapping = {
+  nameProp: '요건명',
+  categoryProp: '구분',
+  requiredCreditsProp: '필요 학점',
+  earnedCreditsProp: '이수 학점',
+}
+const DEFAULT_SEM: SemDbMapping = {
+  nameProp: '학기명',
+  statusProp: '상태',
+  currentStatusValue: '진행 중',
+  gpaProp: '학기 평점',
 }
 
 export async function fetchGraduationRequirements(
   apiKey: string,
-  databaseId: string
+  databaseId: string,
+  mapping: GradDbMapping = DEFAULT_GRAD
 ): Promise<GraduationRequirement[]> {
   const notion = getClient(apiKey)
   const response = await notion.databases.query({ database_id: databaseId })
@@ -34,26 +82,21 @@ export async function fetchGraduationRequirements(
     .filter((p: any) => p.object === 'page')
     .map((page: any) => {
       const props = page.properties
-
-      const name =
-        getProp(props, '요건명')?.title?.[0]?.plain_text ?? ''
-      const category =
-        getProp(props, '구분')?.select?.name ?? ''
-      const requiredCredits =
-        getProp(props, '필요 학점')?.number ?? 0
-      // 이수 학점은 Rollup(sum)으로 저장됨
-      const earnedCredits =
-        getProp(props, '이수 학점')?.rollup?.number ??
-        getProp(props, '취득 학점')?.number ??
-        0
-
+      const name = readText(getPropValue(props, mapping.nameProp))
+      const category = readSelect(getPropValue(props, mapping.categoryProp))
+      const requiredCredits = readNumber(getPropValue(props, mapping.requiredCreditsProp))
+      // earned: try mapped prop, then fallback alternate name
+      const earnedProp = getPropValue(props, mapping.earnedCreditsProp)
+      const earnedCredits = readNumber(earnedProp) ||
+        readNumber(getPropValue(props, '취득 학점'))
       return { name, category, requiredCredits, earnedCredits }
     })
 }
 
 export async function fetchSemesters(
   apiKey: string,
-  databaseId: string
+  databaseId: string,
+  mapping: SemDbMapping = DEFAULT_SEM
 ): Promise<Semester[]> {
   const notion = getClient(apiKey)
   const response = await notion.databases.query({
@@ -65,23 +108,13 @@ export async function fetchSemesters(
     .filter((p: any) => p.object === 'page')
     .map((page: any) => {
       const props = page.properties
-
-      const name =
-        getProp(props, '학기명')?.title?.[0]?.plain_text ?? ''
-      const year =
-        getProp(props, '연도')?.number ?? undefined
-      const term =
-        getProp(props, '학기 구분')?.select?.name ?? undefined
-      const status =
-        getProp(props, '상태')?.status?.name ??
-        getProp(props, '상태')?.select?.name ??
-        ''
-      // 학기 평점: 사용자가 추가한 경우에만 존재
-      const gpa =
-        getProp(props, '학기 평점')?.formula?.number ??
-        getProp(props, '학기 평점')?.number ??
-        null
-
+      const name = readText(getPropValue(props, mapping.nameProp))
+      const year = (getPropValue(props, '연도'))?.number ?? undefined
+      const term = readSelect(getPropValue(props, '학기 구분')) || undefined
+      const status = readSelect(getPropValue(props, mapping.statusProp))
+      const gpa = mapping.gpaProp
+        ? (readNumber(getPropValue(props, mapping.gpaProp)) || null)
+        : null
       return { name, year, term, status, gpa }
     })
 }

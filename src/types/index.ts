@@ -31,15 +31,36 @@ export type WidgetConfig = {
   title?: string
 }
 
-// 새 방식 — 서버 측 암호화 configId 기반
+export type DatabaseInfo = {
+  id: string
+  title: string
+}
+
+export type PropertyInfo = {
+  id: string
+  name: string
+  type: string
+}
+
+export type GradDbMapping = {
+  nameProp: string
+  categoryProp: string
+  requiredCreditsProp: string
+  earnedCreditsProp: string
+}
+
+export type SemDbMapping = {
+  nameProp: string
+  statusProp: string
+  currentStatusValue: string
+  gpaProp: string | null
+}
+
 export type SavedConfig = {
   apiKey: string
   graduationDbId: string
   semesterDbId: string
   title: string
-}
-
-export type DatabaseInfo = {
-  id: string
-  title: string
+  gradMapping?: GradDbMapping
+  semMapping?: SemDbMapping
 }

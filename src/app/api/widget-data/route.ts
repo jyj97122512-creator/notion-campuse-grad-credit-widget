@@ -12,11 +12,11 @@ export async function GET(request: NextRequest) {
 
   try {
     const config = decryptConfig(configId) as SavedConfig
-    const { apiKey, graduationDbId, semesterDbId } = config
+    const { apiKey, graduationDbId, semesterDbId, gradMapping, semMapping } = config
 
     const [requirements, semesters] = await Promise.all([
-      fetchGraduationRequirements(apiKey, graduationDbId),
-      fetchSemesters(apiKey, semesterDbId),
+      fetchGraduationRequirements(apiKey, graduationDbId, gradMapping),
+      fetchSemesters(apiKey, semesterDbId, semMapping),
     ])
 
     const summary = calculateCreditSummary(requirements, semesters)
