@@ -19,7 +19,14 @@ export async function GET(request: NextRequest) {
       fetchSemesters(apiKey, semesterDbId, semMapping),
     ])
 
-    const summary = calculateCreditSummary(requirements, semesters)
+    const summary = calculateCreditSummary(
+      requirements,
+      semesters,
+      gradMapping?.majorValues ?? [],
+      gradMapping?.liberalArtsValues ?? [],
+      semMapping?.currentStatusValue ?? '진행 중'
+    )
+
     return NextResponse.json({ summary, updatedAt: new Date().toISOString(), title: config.title })
   } catch (err: any) {
     const msg = err?.message ?? ''

@@ -26,6 +26,10 @@ export async function listDbProperties(apiKey: string, dbId: string): Promise<Pr
     id: p.id,
     name: p.name,
     type: p.type,
+    options: p.select?.options?.map((o: any) => o.name)
+      ?? p.multi_select?.options?.map((o: any) => o.name)
+      ?? p.status?.options?.map((o: any) => o.name)
+      ?? undefined,
   }))
 }
 
@@ -62,6 +66,8 @@ const DEFAULT_GRAD: GradDbMapping = {
   categoryProp: '구분',
   requiredCreditsProp: '필요 학점',
   earnedCreditsProp: '이수 학점',
+  majorValues: ['전공필수', '전공선택', '복수전공', '부전공'],
+  liberalArtsValues: ['교양필수', '교양선택', '기초교양', '핵심교양'],
 }
 const DEFAULT_SEM: SemDbMapping = {
   nameProp: '학기명',

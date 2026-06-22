@@ -3,21 +3,10 @@
 import { useState } from 'react'
 import { DatabaseInfo, PropertyInfo, GradDbMapping, SemDbMapping } from '@/types'
 
-// ── 색상 ─────────────────────────────────────────
 const C = {
-  bg: '#F5F7F1',
-  border: '#C8D4BC',
-  accent: '#4A6640',
-  accentMid: '#6B8A5E',
-  accentLight: '#A8BC98',
-  text: '#2E3B28',
-  muted: '#7A9170',
-  card: '#FFFFFF',
-  error: '#8B4040',
-  errorBg: '#FDF0F0',
-  success: '#3A6B35',
-  successBg: '#EDF5EB',
-  step: '#D4DCC8',
+  bg: '#F5F7F1', border: '#C8D4BC', accent: '#4A6640', accentMid: '#6B8A5E',
+  accentLight: '#A8BC98', text: '#2E3B28', muted: '#7A9170', card: '#FFFFFF',
+  error: '#8B4040', errorBg: '#FDF0F0', success: '#3A6B35', successBg: '#EDF5EB', step: '#D4DCC8',
 }
 
 const inputStyle: React.CSSProperties = {
@@ -25,26 +14,21 @@ const inputStyle: React.CSSProperties = {
   borderRadius: '6px', fontSize: '13px', background: C.card, color: C.text,
   outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit',
 }
-
 const labelStyle: React.CSSProperties = {
   display: 'block', fontSize: '11px', fontWeight: 700, color: C.accent,
   letterSpacing: '0.06em', marginBottom: '5px',
 }
-
 const btnPrimary: React.CSSProperties = {
   width: '100%', padding: '11px', background: C.accentMid, color: '#fff',
   border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 700,
   cursor: 'pointer', letterSpacing: '0.04em',
 }
-
 const btnSecondary: React.CSSProperties = {
   padding: '8px 14px', background: 'transparent', color: C.muted,
   border: `1.5px solid ${C.border}`, borderRadius: '6px', fontSize: '12px', cursor: 'pointer',
 }
-
 const selectStyle: React.CSSProperties = {
-  ...inputStyle,
-  appearance: 'none',
+  ...inputStyle, appearance: 'none',
   backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%237A9170' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E")`,
   backgroundRepeat: 'no-repeat', backgroundPosition: 'right 10px center', paddingRight: '28px',
 }
@@ -61,14 +45,27 @@ function autoDetectDb(databases: DatabaseInfo[]) {
 }
 
 // ── 속성 자동 감지 ────────────────────────────────
+const MAJOR_KEYWORDS    = ['전공']
+const LIBERAL_KEYWORDS  = ['교양', '기초', '핵심']
+
 function autoDetectGradMapping(props: PropertyInfo[]): GradDbMapping {
   const find = (types: string[], keywords: string[]) =>
     props.find(p => types.includes(p.type) && keywords.some(k => p.name.toLowerCase().includes(k)))?.name ?? ''
+
+  const categoryProp = find(['select', 'multi_select'], ['구분', '분류', 'category', 'type'])
+  const categoryOptions = props.find(p => p.name === categoryProp)?.options ?? []
+
+  const lower = (s: string) => s.toLowerCase()
+  const majorValues = categoryOptions.filter(o => MAJOR_KEYWORDS.some(k => lower(o).includes(k)))
+  const liberalArtsValues = categoryOptions.filter(o => LIBERAL_KEYWORDS.some(k => lower(o).includes(k)))
+
   return {
     nameProp: props.find(p => p.type === 'title')?.name ?? '',
-    categoryProp: find(['select', 'multi_select'], ['구분', '분류', 'category', 'type']),
+    categoryProp,
     requiredCreditsProp: find(['number'], ['필요', 'required', '기준', '이수필요']),
     earnedCreditsProp: find(['number', 'rollup', 'formula'], ['이수', '취득', 'earned', 'completed', '완료']),
+    majorValues,
+    liberalArtsValues,
   }
 }
 
@@ -83,34 +80,22 @@ function autoDetectSemMapping(props: PropertyInfo[]): SemDbMapping {
   }
 }
 
-// ── 단계 표시기 (3단계) ────────────────────────────
+// ── 단계 표시기 ───────────────────────────────────
 function StepIndicator({ current }: { current: 1 | 2 | 3 }) {
   const steps = ['Notion 연결', '속성 설정', '완료']
   return (
     <div style={{ display: 'flex', alignItems: 'center', marginBottom: '24px' }}>
       {steps.map((label, i) => {
-        const n = i + 1
-        const done = n < current
-        const active = n === current
+        const n = i + 1; const done = n < current; const active = n === current
         return (
           <div key={n} style={{ display: 'flex', alignItems: 'center', flex: n < steps.length ? 1 : 'none' }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px' }}>
-              <div style={{
-                width: '24px', height: '24px', borderRadius: '50%',
-                background: done ? C.accentMid : active ? C.accent : C.step,
-                color: done || active ? '#fff' : C.muted,
-                fontSize: '11px', fontWeight: 700,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
+              <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: done ? C.accentMid : active ? C.accent : C.step, color: done || active ? '#fff' : C.muted, fontSize: '11px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {done ? '✓' : n}
               </div>
-              <span style={{ fontSize: '9px', color: active ? C.accent : C.muted, fontWeight: active ? 700 : 400, whiteSpace: 'nowrap' }}>
-                {label}
-              </span>
+              <span style={{ fontSize: '9px', color: active ? C.accent : C.muted, fontWeight: active ? 700 : 400, whiteSpace: 'nowrap' }}>{label}</span>
             </div>
-            {n < steps.length && (
-              <div style={{ flex: 1, height: '1.5px', background: done ? C.accentMid : C.step, margin: '0 4px', marginBottom: '14px' }} />
-            )}
+            {n < steps.length && <div style={{ flex: 1, height: '1.5px', background: done ? C.accentMid : C.step, margin: '0 4px', marginBottom: '14px' }} />}
           </div>
         )
       })}
@@ -118,36 +103,82 @@ function StepIndicator({ current }: { current: 1 | 2 | 3 }) {
   )
 }
 
-// ── 속성 드롭다운 ──────────────────────────────────
-function PropSelect({ label, hint, properties, value, onChange, optional = false, filterTypes }: {
+// ── 속성 드롭다운 ─────────────────────────────────
+function PropSelect({ label, hint, properties, value, onChange, filterTypes }: {
   label: string; hint?: string; properties: PropertyInfo[]; value: string
-  onChange: (name: string) => void; optional?: boolean; filterTypes?: string[]
+  onChange: (name: string) => void; filterTypes?: string[]
 }) {
   const filtered = filterTypes ? properties.filter(p => filterTypes.includes(p.type)) : properties
   return (
     <div>
-      <label style={labelStyle}>
-        {label}
-        {optional && <span style={{ fontWeight: 400, color: C.muted, marginLeft: 4 }}>(선택)</span>}
-      </label>
+      <label style={labelStyle}>{label}</label>
       {hint && <p style={{ fontSize: '10px', color: C.muted, margin: '0 0 5px' }}>{hint}</p>}
       <select value={value} onChange={e => onChange(e.target.value)} style={selectStyle}>
-        {optional && <option value="">— 사용 안 함 —</option>}
-        {!optional && <option value="">— 선택하세요 —</option>}
-        {filtered.map(p => (
-          <option key={p.id} value={p.name}>{p.name}</option>
-        ))}
+        <option value="">— 선택하세요 —</option>
+        {filtered.map(p => <option key={p.id} value={p.name}>{p.name}</option>)}
       </select>
     </div>
   )
 }
 
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return (
-    <p style={{ fontSize: '11px', fontWeight: 700, color: C.accent, letterSpacing: '0.05em', margin: '4px 0 10px', textTransform: 'uppercase' }}>
-      {children}
-    </p>
+// ── 구분값 배정 UI ────────────────────────────────
+type CategoryAssignment = '전공' | '교양' | '기타'
+
+function CategoryMapper({ options, majorValues, liberalArtsValues, onChange }: {
+  options: string[]
+  majorValues: string[]
+  liberalArtsValues: string[]
+  onChange: (major: string[], liberal: string[]) => void
+}) {
+  function getAssignment(opt: string): CategoryAssignment {
+    if (majorValues.includes(opt)) return '전공'
+    if (liberalArtsValues.includes(opt)) return '교양'
+    return '기타'
+  }
+
+  function setAssignment(opt: string, val: CategoryAssignment) {
+    const newMajor = majorValues.filter(v => v !== opt)
+    const newLiberal = liberalArtsValues.filter(v => v !== opt)
+    if (val === '전공') newMajor.push(opt)
+    if (val === '교양') newLiberal.push(opt)
+    onChange(newMajor, newLiberal)
+  }
+
+  if (!options.length) return (
+    <p style={{ fontSize: '11px', color: C.muted, margin: 0 }}>구분 속성의 옵션을 불러오지 못했습니다.</p>
   )
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+      {options.map(opt => (
+        <div key={opt} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ flex: 1, fontSize: '12px', color: C.text, fontWeight: 500 }}>{opt}</span>
+          {(['전공', '교양', '기타'] as CategoryAssignment[]).map(type => {
+            const active = getAssignment(opt) === type
+            return (
+              <button
+                key={type}
+                onClick={() => setAssignment(opt, type)}
+                style={{
+                  padding: '3px 10px', borderRadius: '99px', fontSize: '11px', fontWeight: active ? 700 : 400,
+                  cursor: 'pointer', border: `1.5px solid ${active ? C.accentMid : C.border}`,
+                  background: active ? (type === '전공' ? C.accentMid : type === '교양' ? '#7A9A6B' : C.step) : 'transparent',
+                  color: active ? '#fff' : C.muted,
+                  transition: 'all 0.15s',
+                }}
+              >
+                {type}
+              </button>
+            )
+          })}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return <p style={{ fontSize: '11px', fontWeight: 700, color: C.accent, letterSpacing: '0.05em', margin: '4px 0 10px', textTransform: 'uppercase' }}>{children}</p>
 }
 
 // ════════════════════════════════════════════════════
@@ -155,31 +186,33 @@ export default function SetupForm({ onSuccess }: { onSuccess: (embedUrl: string)
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [apiKey, setApiKey] = useState('')
   const [title, setTitle] = useState('Credit Buddy')
-
   const [graduationDbId, setGraduationDbId] = useState('')
   const [semesterDbId, setSemesterDbId] = useState('')
   const [gradDbTitle, setGradDbTitle] = useState('')
   const [semDbTitle, setSemDbTitle] = useState('')
-
   const [gradProps, setGradProps] = useState<PropertyInfo[]>([])
-  const [semProps, setSemProps] = useState<PropertyInfo[]>([])
-  const [gradMapping, setGradMapping] = useState<GradDbMapping>({ nameProp: '', categoryProp: '', requiredCreditsProp: '', earnedCreditsProp: '' })
-  const [semMapping, setSemMapping] = useState<SemDbMapping>({ nameProp: '', statusProp: '', currentStatusValue: '진행 중', gpaProp: null })
-
+  const [gradMapping, setGradMapping] = useState<GradDbMapping>({
+    nameProp: '', categoryProp: '', requiredCreditsProp: '', earnedCreditsProp: '',
+    majorValues: [], liberalArtsValues: [],
+  })
+  const [semMapping, setSemMapping] = useState<SemDbMapping>({
+    nameProp: '', statusProp: '', currentStatusValue: '진행 중', gpaProp: null,
+  })
   const [embedUrl, setEmbedUrl] = useState('')
   const [copied, setCopied] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  // ── Step 1: API Key → DB 자동 감지 → 속성 로드 ────
+  // categoryProp에 해당하는 옵션 목록
+  const categoryOptions = gradProps.find(p => p.name === gradMapping.categoryProp)?.options ?? []
+
+  // ── Step 1 ────────────────────────────────────────
   async function handleConnect() {
     if (!apiKey.trim()) { setError('Notion API 키를 입력해주세요.'); return }
     setLoading(true); setError('')
     try {
-      // DB 목록 조회
       const dbRes = await fetch('/api/notion/databases', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ apiKey: apiKey.trim() }),
       })
       const dbData = await dbRes.json()
@@ -187,27 +220,15 @@ export default function SetupForm({ onSuccess }: { onSuccess: (embedUrl: string)
 
       const dbs: DatabaseInfo[] = dbData.databases
       const { grad, sem } = autoDetectDb(dbs)
-
       if (!grad) throw new Error('졸업요건 DB를 찾지 못했습니다. DB 이름에 "졸업" 또는 "요건"이 포함되어 있어야 해요.')
       if (!sem)  throw new Error('학기 DB를 찾지 못했습니다. DB 이름에 "학기" 또는 "semester"가 포함되어 있어야 해요.')
 
-      setGraduationDbId(grad.id)
-      setSemesterDbId(sem.id)
-      setGradDbTitle(grad.title)
-      setSemDbTitle(sem.title)
+      setGraduationDbId(grad.id); setSemesterDbId(sem.id)
+      setGradDbTitle(grad.title); setSemDbTitle(sem.title)
 
-      // 두 DB 속성 동시 조회
       const [gradRes, semRes] = await Promise.all([
-        fetch('/api/notion/properties', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ apiKey: apiKey.trim(), dbId: grad.id }),
-        }),
-        fetch('/api/notion/properties', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ apiKey: apiKey.trim(), dbId: sem.id }),
-        }),
+        fetch('/api/notion/properties', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ apiKey: apiKey.trim(), dbId: grad.id }) }),
+        fetch('/api/notion/properties', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ apiKey: apiKey.trim(), dbId: sem.id }) }),
       ])
       const gradPropData = await gradRes.json()
       const semPropData = await semRes.json()
@@ -217,45 +238,37 @@ export default function SetupForm({ onSuccess }: { onSuccess: (embedUrl: string)
       const gProps: PropertyInfo[] = gradPropData.properties
       const sProps: PropertyInfo[] = semPropData.properties
       setGradProps(gProps)
-      setSemProps(sProps)
       setGradMapping(autoDetectGradMapping(gProps))
       setSemMapping(autoDetectSemMapping(sProps))
       setStep(2)
     } catch (e: any) {
       setError(e.message ?? '연결에 실패했습니다.')
-    } finally {
-      setLoading(false)
-    }
+    } finally { setLoading(false) }
   }
 
-  // ── Step 2: 매핑 확인 → configId 생성 ────────────
+  // ── Step 2 ────────────────────────────────────────
   async function handleGenerate() {
-    if (!gradMapping.earnedCreditsProp) { setError('졸업요건 DB의 이수 학점 속성을 선택해주세요.'); return }
-    if (!semMapping.statusProp)           { setError('학기 DB의 진행 상태 속성을 선택해주세요.'); return }
+    if (!gradMapping.earnedCreditsProp) { setError('이수 학점 속성을 선택해주세요.'); return }
+    if (gradMapping.majorValues.length === 0) { setError('전공 학점으로 분류할 구분값을 하나 이상 선택해주세요.'); return }
+    if (gradMapping.liberalArtsValues.length === 0) { setError('교양 학점으로 분류할 구분값을 하나 이상 선택해주세요.'); return }
     setLoading(true); setError('')
     try {
       const res = await fetch('/api/configs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ apiKey: apiKey.trim(), graduationDbId, semesterDbId, title, gradMapping, semMapping }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
       const url = `${window.location.origin}/widget?config=${data.configId}`
-      setEmbedUrl(url)
-      setStep(3)
-      onSuccess(url)
+      setEmbedUrl(url); setStep(3); onSuccess(url)
     } catch (e: any) {
       setError(e.message ?? 'URL 생성에 실패했습니다.')
-    } finally {
-      setLoading(false)
-    }
+    } finally { setLoading(false) }
   }
 
   async function copyUrl() {
     await navigator.clipboard.writeText(embedUrl)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    setCopied(true); setTimeout(() => setCopied(false), 2000)
   }
 
   return (
@@ -267,24 +280,20 @@ export default function SetupForm({ onSuccess }: { onSuccess: (embedUrl: string)
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div style={{ background: C.bg, borderRadius: '8px', padding: '14px', fontSize: '12px', color: C.muted, lineHeight: 1.6 }}>
             <strong style={{ color: C.accent, display: 'block', marginBottom: '4px' }}>🔑 Notion 연결하기</strong>
-            <a href="https://www.notion.so/my-integrations" target="_blank" rel="noreferrer"
-              style={{ color: C.accentMid, textDecoration: 'underline' }}>
+            <a href="https://www.notion.so/my-integrations" target="_blank" rel="noreferrer" style={{ color: C.accentMid, textDecoration: 'underline' }}>
               notion.so/my-integrations
             </a>
             {' '}에서 통합을 만들고, 졸업요건 DB와 학기 DB에 연결 권한을 부여한 뒤 API 키를 붙여넣으세요.
           </div>
           <div>
             <label style={labelStyle}>Notion API 키</label>
-            <input
-              style={inputStyle} type="password" placeholder="secret_xxxxxxxxxxxxxxxxxxxx"
+            <input style={inputStyle} type="password" placeholder="secret_xxxxxxxxxxxxxxxxxxxx"
               value={apiKey} onChange={e => { setApiKey(e.target.value); setError('') }}
-              onKeyDown={e => e.key === 'Enter' && handleConnect()} autoComplete="off"
-            />
+              onKeyDown={e => e.key === 'Enter' && handleConnect()} autoComplete="off" />
           </div>
           <div>
             <label style={labelStyle}>위젯 제목 (선택)</label>
-            <input style={inputStyle} type="text" placeholder="Credit Buddy"
-              value={title} onChange={e => setTitle(e.target.value)} />
+            <input style={inputStyle} type="text" placeholder="Credit Buddy" value={title} onChange={e => setTitle(e.target.value)} />
           </div>
           {error && <ErrorBox msg={error} />}
           <button onClick={handleConnect} disabled={loading} style={{ ...btnPrimary, opacity: loading ? 0.6 : 1 }}>
@@ -296,19 +305,15 @@ export default function SetupForm({ onSuccess }: { onSuccess: (embedUrl: string)
       {/* ── STEP 2 ── */}
       {step === 2 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          {/* 감지된 DB 표시 */}
           <div style={{ background: C.successBg, border: `1px solid ${C.accentLight}`, borderRadius: '8px', padding: '10px 14px', fontSize: '11px', color: C.success, lineHeight: 1.7 }}>
             ✓ DB 자동 감지 완료<br />
             <span style={{ color: C.muted }}>졸업요건: <strong style={{ color: C.text }}>{gradDbTitle}</strong> · 학기: <strong style={{ color: C.text }}>{semDbTitle}</strong></span>
           </div>
 
-          <div style={{ fontSize: '11px', color: C.muted, lineHeight: 1.6, padding: '0 2px' }}>
-            각 DB에서 위젯에 표시할 속성을 선택해주세요. 자동으로 감지된 속성은 미리 선택되어 있어요.
-          </div>
-
           {/* 졸업요건 DB */}
-          <div style={{ border: `1px solid ${C.border}`, borderRadius: '8px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ border: `1px solid ${C.border}`, borderRadius: '8px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <SectionTitle>졸업요건 DB 속성</SectionTitle>
+
             <PropSelect
               label="이수 학점"
               hint="실제 취득한 학점 — 수강 기록과 연결된 롤업·수식 속성"
@@ -317,10 +322,23 @@ export default function SetupForm({ onSuccess }: { onSuccess: (embedUrl: string)
               onChange={v => setGradMapping(m => ({ ...m, earnedCreditsProp: v }))}
               filterTypes={['number', 'rollup', 'formula']}
             />
+
+            <div>
+              <label style={labelStyle}>학점 구분 배정</label>
+              <p style={{ fontSize: '10px', color: C.muted, margin: '0 0 10px' }}>
+                구분 속성의 각 값이 전공·교양 중 어디에 해당하는지 지정해주세요.
+              </p>
+              <CategoryMapper
+                options={categoryOptions}
+                majorValues={gradMapping.majorValues}
+                liberalArtsValues={gradMapping.liberalArtsValues}
+                onChange={(major, liberal) => setGradMapping(m => ({ ...m, majorValues: major, liberalArtsValues: liberal }))}
+              />
+            </div>
           </div>
 
           {/* 학기 DB */}
-          <div style={{ border: `1px solid ${C.border}`, borderRadius: '8px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ border: `1px solid ${C.border}`, borderRadius: '8px', padding: '14px' }}>
             <SectionTitle>학기 DB 속성</SectionTitle>
             <div>
               <label style={labelStyle}>진행 중 상태값</label>
@@ -349,11 +367,7 @@ export default function SetupForm({ onSuccess }: { onSuccess: (embedUrl: string)
           <div>
             <label style={labelStyle}>임베드 URL</label>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <code style={{
-                flex: 1, padding: '10px 12px', background: C.bg,
-                border: `1.5px solid ${C.border}`, borderRadius: '6px',
-                fontSize: '11px', wordBreak: 'break-all', color: C.text, lineHeight: 1.5,
-              }}>
+              <code style={{ flex: 1, padding: '10px 12px', background: C.bg, border: `1.5px solid ${C.border}`, borderRadius: '6px', fontSize: '11px', wordBreak: 'break-all', color: C.text, lineHeight: 1.5 }}>
                 {embedUrl}
               </code>
               <button onClick={copyUrl} style={{ ...btnPrimary, width: 'auto', padding: '0 16px', whiteSpace: 'nowrap', background: copied ? C.success : C.accentMid }}>

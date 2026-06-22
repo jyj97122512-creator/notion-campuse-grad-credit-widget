@@ -40,6 +40,7 @@ export type PropertyInfo = {
   id: string
   name: string
   type: string
+  options?: string[]
 }
 
 export type GradDbMapping = {
@@ -47,6 +48,8 @@ export type GradDbMapping = {
   categoryProp: string
   requiredCreditsProp: string
   earnedCreditsProp: string
+  majorValues: string[]
+  liberalArtsValues: string[]
 }
 
 export type SemDbMapping = {
