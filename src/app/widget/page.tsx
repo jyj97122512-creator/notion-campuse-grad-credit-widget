@@ -1,113 +1,74 @@
-'use client'
-
-import { useEffect, useState, useCallback } from 'react'
-import { useSearchParams } from 'next/navigation'
-import { Suspense } from 'react'
+import { decryptConfig } from '@/lib/crypto'
+import { fetchGraduationRequirements, fetchSemesters } from '@/lib/notion'
+import { calculateCreditSummary } from '@/lib/credit-calculator'
+import { SavedConfig } from '@/types'
 import CreditWidget from '@/components/CreditWidget'
-import { CreditSummary } from '@/types'
 
-function WidgetContent() {
-  const params = useSearchParams()
-  const [summary, setSummary] = useState<CreditSummary | null>(null)
-  const [updatedAt, setUpdatedAt] = useState<string>()
-  const [title, setTitle] = useState('Credit Buddy')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(true)
+export default async function WidgetPage({
+  searchParams,
+}: {
+  searchParams: { config?: string; c?: string }
+}) {
+  const configId = searchParams.config
+  const legacy   = searchParams.c
 
-  // 새 방식: configId 기반
-  const fetchByConfigId = useCallback(async (configId: string) => {
-    setLoading(true)
-    setError('')
+  // ── 새 방식: configId ────────────────────────────
+  if (configId) {
     try {
-      const res = await fetch(`/api/widget-data?config=${encodeURIComponent(configId)}`)
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error)
-      setSummary(data.summary)
-      setUpdatedAt(data.updatedAt)
-      if (data.title) setTitle(data.title)
-    } catch (e: any) {
-      setError(e.message ?? '데이터를 불러오지 못했습니다.')
-    } finally {
-      setLoading(false)
+      const config = decryptConfig(configId) as SavedConfig
+      const { apiKey, graduationDbId, semesterDbId, gradMapping, semMapping } = config
+
+      const [requirements, semesters] = await Promise.all([
+        fetchGraduationRequirements(apiKey, graduationDbId, gradMapping),
+        fetchSemesters(apiKey, semesterDbId, semMapping),
+      ])
+
+      const summary = calculateCreditSummary(
+        requirements,
+        semesters,
+        gradMapping?.majorValues ?? [],
+        gradMapping?.liberalArtsValues ?? [],
+        semMapping?.currentStatusValue ?? '진행 중'
+      )
+
+      return (
+        <div style={{ padding: '16px', background: 'transparent' }}>
+          <CreditWidget summary={summary} title={config.title} updatedAt={new Date().toISOString()} />
+        </div>
+      )
+    } catch {
+      return <WidgetError message="설정이 만료되었거나 올바르지 않습니다." />
     }
-  }, [])
-
-  // 레거시 방식: base64 config
-  const fetchLegacy = useCallback(async (config: { k: string; g: string; s: string; t?: string }) => {
-    setLoading(true)
-    setError('')
-    try {
-      const res = await fetch('/api/notion', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ apiKey: config.k, graduationDbId: config.g, semesterDbId: config.s }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error)
-      setSummary(data.summary)
-      setUpdatedAt(data.updatedAt)
-      if (config.t) setTitle(config.t)
-    } catch (e: any) {
-      setError(e.message ?? '데이터를 불러오지 못했습니다.')
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    const configId = params.get('config')
-    const legacy = params.get('c')
-
-    if (configId) {
-      fetchByConfigId(configId)
-      const interval = setInterval(() => fetchByConfigId(configId), 30 * 60 * 1000)
-      return () => clearInterval(interval)
-    }
-
-    if (legacy) {
-      try {
-        const config = JSON.parse(atob(legacy))
-        fetchLegacy(config)
-        const interval = setInterval(() => fetchLegacy(config), 30 * 60 * 1000)
-        return () => clearInterval(interval)
-      } catch {
-        setError('설정 정보가 올바르지 않습니다.')
-        setLoading(false)
-      }
-      return
-    }
-
-    setError('설정이 없습니다. 먼저 설정 페이지에서 임베드 URL을 생성하세요.')
-    setLoading(false)
-  }, [params, fetchByConfigId, fetchLegacy])
-
-  if (loading) {
-    return (
-      <div style={{ width: 320, minHeight: 240, background: '#E8EDE0', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12 }}>
-        <span style={{ fontSize: 24 }}>🌿</span>
-        <p style={{ fontSize: 12, color: '#7A9170', margin: 0 }}>학점 정보를 불러오는 중…</p>
-      </div>
-    )
   }
 
-  if (error) {
-    return (
-      <div style={{ width: 320, background: '#E8EDE0', borderRadius: 12, padding: 20 }}>
-        <p style={{ fontSize: 12, color: '#8B4040', margin: 0 }}>⚠ {error}</p>
-      </div>
-    )
+  // ── 레거시: base64 config ────────────────────────
+  if (legacy) {
+    try {
+      const config = JSON.parse(Buffer.from(legacy, 'base64').toString())
+      const [requirements, semesters] = await Promise.all([
+        fetchGraduationRequirements(config.k, config.g),
+        fetchSemesters(config.k, config.s),
+      ])
+      const summary = calculateCreditSummary(requirements, semesters)
+      return (
+        <div style={{ padding: '16px', background: 'transparent' }}>
+          <CreditWidget summary={summary} title={config.t ?? 'Credit Buddy'} updatedAt={new Date().toISOString()} />
+        </div>
+      )
+    } catch {
+      return <WidgetError message="설정 정보가 올바르지 않습니다." />
+    }
   }
 
-  if (!summary) return null
-  return <CreditWidget summary={summary} title={title} updatedAt={updatedAt} />
+  return <WidgetError message="설정이 없습니다. 설정 페이지에서 임베드 URL을 생성하세요." />
 }
 
-export default function WidgetPage() {
+function WidgetError({ message }: { message: string }) {
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '16px', background: 'transparent' }}>
-      <Suspense fallback={<div style={{ color: '#8A8A8A', fontSize: 12 }}>로딩 중…</div>}>
-        <WidgetContent />
-      </Suspense>
+    <div style={{ padding: '16px' }}>
+      <div style={{ background: '#E8EDE0', borderRadius: '12px', padding: '20px' }}>
+        <p style={{ fontSize: '12px', color: '#8B4040', margin: 0 }}>⚠ {message}</p>
+      </div>
     </div>
   )
 }

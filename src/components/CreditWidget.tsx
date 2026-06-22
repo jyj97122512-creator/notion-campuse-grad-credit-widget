@@ -1,5 +1,3 @@
-'use client'
-
 import { CreditSummary } from '@/types'
 import { getStatusMessage } from '@/lib/credit-calculator'
 
