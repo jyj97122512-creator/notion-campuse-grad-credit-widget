@@ -166,8 +166,8 @@ export default function CreditWidget({ summary, title = 'Credit Buddy', updatedA
   const bgStyle = {
     background: C.bg,
     backgroundImage: `
-      linear-gradient(${C.cardBorder}55 1px, transparent 1px),
-      linear-gradient(90deg, ${C.cardBorder}55 1px, transparent 1px)
+      linear-gradient(rgba(212,220,200,0.33) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(212,220,200,0.33) 1px, transparent 1px)
     `,
     backgroundSize: '20px 20px',
     borderRadius: '12px',

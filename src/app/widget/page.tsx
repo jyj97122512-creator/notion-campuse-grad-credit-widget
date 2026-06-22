@@ -4,6 +4,8 @@ import { calculateCreditSummary } from '@/lib/credit-calculator'
 import { SavedConfig } from '@/types'
 import CreditWidget from '@/components/CreditWidget'
 
+export const dynamic = 'force-dynamic'
+
 export default async function WidgetPage({
   searchParams,
 }: {
@@ -32,7 +34,7 @@ export default async function WidgetPage({
       )
 
       return (
-        <div style={{ padding: '16px', background: 'transparent' }}>
+        <div style={{ padding: '16px', background: '#E8EDE0' }}>
           <CreditWidget summary={summary} title={config.title} updatedAt={new Date().toISOString()} />
         </div>
       )
@@ -51,7 +53,7 @@ export default async function WidgetPage({
       ])
       const summary = calculateCreditSummary(requirements, semesters)
       return (
-        <div style={{ padding: '16px', background: 'transparent' }}>
+        <div style={{ padding: '16px', background: '#E8EDE0' }}>
           <CreditWidget summary={summary} title={config.t ?? 'Credit Buddy'} updatedAt={new Date().toISOString()} />
         </div>
       )
