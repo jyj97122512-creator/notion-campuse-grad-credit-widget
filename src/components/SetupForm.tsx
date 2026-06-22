@@ -322,29 +322,13 @@ export default function SetupForm({ onSuccess }: { onSuccess: (embedUrl: string)
           {/* 학기 DB */}
           <div style={{ border: `1px solid ${C.border}`, borderRadius: '8px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <SectionTitle>학기 DB 속성</SectionTitle>
-            <PropSelect
-              label="진행 상태"
-              hint="현재 학기를 나타내는 상태 속성"
-              properties={semProps}
-              value={semMapping.statusProp}
-              onChange={v => setSemMapping(m => ({ ...m, statusProp: v }))}
-              filterTypes={['status', 'select']}
-            />
             <div>
               <label style={labelStyle}>진행 중 상태값</label>
-              <p style={{ fontSize: '10px', color: C.muted, margin: '0 0 5px' }}>위 속성에서 "현재 학기"를 나타내는 값</p>
+              <p style={{ fontSize: '10px', color: C.muted, margin: '0 0 5px' }}>상태 속성에서 "현재 학기"를 나타내는 값</p>
               <input style={inputStyle} type="text" placeholder="진행 중"
                 value={semMapping.currentStatusValue}
                 onChange={e => setSemMapping(m => ({ ...m, currentStatusValue: e.target.value }))} />
             </div>
-            <PropSelect
-              label="학기 평점"
-              properties={semProps}
-              value={semMapping.gpaProp ?? ''}
-              onChange={v => setSemMapping(m => ({ ...m, gpaProp: v || null }))}
-              filterTypes={['number', 'formula']}
-              optional
-            />
           </div>
 
           {error && <ErrorBox msg={error} />}
