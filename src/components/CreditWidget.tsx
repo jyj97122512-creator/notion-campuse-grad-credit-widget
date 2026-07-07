@@ -2,148 +2,105 @@ import { CreditSummary } from '@/types'
 import { getStatusMessage } from '@/lib/credit-calculator'
 
 const FONT = {
-  deco: 'DOSSaemmul, sans-serif',
-  data: 'ChosunGu, sans-serif',
+  main: 'DOSSaemmul, sans-serif',
+  deco: 'ChosunGu, sans-serif',
 }
 
 const C = {
-  bg: '#E8EDE0',
-  card: '#F5F7F1',
-  cardBorder: '#D4DCC8',
-  accentDark: '#4A6640',
-  accentMid: '#6B8A5E',
-  accentLight: '#A8BC98',
-  text: '#3A4A35',
-  muted: '#7A9170',
-  mutedLight: '#9AAD8E',
-  sublabel: '#5E7255',
-  footer: '#5C7A4E',
-  footerText: '#E8EDE0',
-  progressBg: '#D4DCC8',
+  bg: '#eef3db',
+  card: '#f5f7e7',
+  listBg: '#f0f2df',
+  border: '#9caf73',
+  darkBorder: '#7f965b',
+  text: '#29331d',
+  muted: '#7d856e',
+  accent: '#526733',
+  accentDark: '#153209',
+  winBtn: '#d4e8aa',
+  statusBg: '#e8efcc',
+  progFill: '#5a8028',
 }
 
+const raised = (w = 2): React.CSSProperties => ({
+  borderStyle: 'solid',
+  borderWidth: `${w}px`,
+  borderColor: `#fff ${C.border} ${C.border} #fff`,
+})
 
-function isUnset(earned: number | string, required?: number) {
-  return typeof earned === 'number' && earned === 0 && required === 0
+const sunken = (): React.CSSProperties => ({
+  borderStyle: 'solid',
+  borderWidth: '1px',
+  borderColor: `${C.border} #fff #fff ${C.border}`,
+})
+
+function WinButton({ label }: { label: string }) {
+  return (
+    <div style={{
+      width: '18px', height: '16px',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      background: C.winBtn, fontFamily: FONT.main,
+      fontSize: '10px', fontWeight: 900, color: C.accentDark,
+      ...raised(1),
+    }}>
+      {label}
+    </div>
+  )
 }
 
-// ── StatCard ──────────────────────────────────────
 function StatCard({
-  icon, label, earned, required, compact = false,
+  label, earned, required, compact = false,
 }: {
-  icon: string
   label: string
   earned: number | string
   required?: number
   compact?: boolean
 }) {
-  const unset = isUnset(earned, required)
-  const iconSize = compact ? 16 : 20
+  const unset = typeof earned === 'number' && earned === 0 && required === 0
 
   return (
     <div style={{
       background: C.card,
-      border: `1px solid ${C.cardBorder}`,
-      borderRadius: '8px',
-      padding: compact ? '8px 10px' : '12px 14px 10px',
+      ...raised(1),
+      padding: compact ? '6px 8px' : '8px 10px',
       flex: 1,
       minWidth: 0,
     }}>
-      {/* Header: 아이콘 + 제목 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: compact ? '5px' : '6px', marginBottom: compact ? '4px' : '7px' }}>
-        <img src={icon} alt="" style={{ width: iconSize, height: iconSize, objectFit: 'contain', flexShrink: 0 }} />
-        <span style={{ fontSize: compact ? '9px' : '10px', fontWeight: 700, color: C.text, lineHeight: 1.2, fontFamily: FONT.data }}>
-          {label}
-        </span>
+      <div style={{ fontSize: '9px', color: C.accent, fontWeight: 900, marginBottom: '4px', fontFamily: FONT.main, letterSpacing: '0.3px' }}>
+        {label}
       </div>
-
-      {/* Body: 아이콘 왼쪽 기준선 (margin-left: 0) */}
-      {/* 점선 */}
-      <div style={{ borderTop: `1px dashed ${C.cardBorder}`, marginBottom: compact ? '4px' : '7px' }} />
-
-      {/* 값 */}
+      <div style={{ borderTop: `1px dotted ${C.border}`, marginBottom: '5px' }} />
       {unset ? (
-        <>
-          <div style={{ fontFamily: FONT.data, fontWeight: 600, color: C.mutedLight, fontSize: compact ? '12px' : '15px', lineHeight: 1 }}>
-            미설정
-          </div>
-          {!compact && (
-            <div style={{ fontSize: '9px', color: C.sublabel, fontWeight: 600, marginTop: '4px', fontFamily: FONT.data }}>
-              필요 학점 미설정
-            </div>
-          )}
-        </>
+        <div style={{ fontSize: '12px', color: C.muted, fontWeight: 700, fontFamily: FONT.main }}>미설정</div>
       ) : (
-        <>
-          <div style={{ fontFamily: FONT.data, fontWeight: 700, color: C.accentDark, fontSize: compact ? '15px' : '18px', lineHeight: 1 }}>
+        <div style={{ fontFamily: FONT.main, fontWeight: 900, color: C.text }}>
+          <span style={{ fontSize: compact ? '14px' : '16px', color: C.accentDark }}>
             {earned}
-            {required !== undefined && (
-              <span style={{ fontSize: compact ? '9px' : '11px', color: C.mutedLight, fontWeight: 400 }}>
-                &nbsp;/&nbsp;{required}
-              </span>
-            )}
-          </div>
-          {!compact && required !== undefined && (
-            <div style={{ fontSize: '9px', color: C.sublabel, fontWeight: 600, marginTop: '4px', fontFamily: FONT.data }}>
-              취득 / 필요
-            </div>
+          </span>
+          {required !== undefined && (
+            <span style={{ fontSize: '10px', color: C.muted }}>/{required}</span>
           )}
-        </>
-      )}
-    </div>
-  )
-}
-
-// ── Footer ────────────────────────────────────────
-function Footer({ updatedTime }: { updatedTime: string | null }) {
-  return (
-    <div style={{
-      background: C.footer,
-      borderRadius: '6px',
-      padding: '8px 14px',
-      display: 'flex',
-      alignItems: 'center',
-      flexWrap: 'wrap',
-      gap: '3px 8px',
-    }}>
-      <span style={{ fontSize: '9px', color: C.footerText, opacity: 0.75, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: FONT.data, whiteSpace: 'nowrap' }}>
-        Last Updated
-      </span>
-      {updatedTime && (
-        <span style={{ fontSize: '9px', color: C.footerText, fontFamily: FONT.data, whiteSpace: 'nowrap' }}>
-          {updatedTime} 기준
-        </span>
-      )}
-      <span style={{ fontSize: '8px', color: C.footerText, opacity: 0.6, fontFamily: FONT.deco, marginLeft: 'auto', whiteSpace: 'nowrap' }}>
-        EVERY DAY IS A STEP FORWARD.
-      </span>
-    </div>
-  )
-}
-
-// ── ProgressBar ───────────────────────────────────
-function ProgressBar({ pct, showMarkers = true }: { pct: number; showMarkers?: boolean }) {
-  return (
-    <div style={{ position: 'relative' }}>
-      <div style={{ height: '8px', background: C.progressBg, borderRadius: '4px', overflow: 'hidden' }}>
-        <div
-          className="progress-fill"
-          style={{
-            height: '100%',
-            width: `${pct}%`,
-            background: C.accentMid,
-            borderRadius: '4px',
-            '--target-width': `${pct}%`,
-          } as React.CSSProperties}
-        />
-      </div>
-      {showMarkers && (
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px' }}>
-          {['0%', '50%', '100%'].map(m => (
-            <span key={m} style={{ fontSize: '7px', color: C.mutedLight, fontFamily: FONT.data }}>{m}</span>
-          ))}
         </div>
       )}
+    </div>
+  )
+}
+
+function Win98Progress({ pct }: { pct: number }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+      <div style={{ ...sunken(), background: '#fff', height: '16px', padding: '2px', overflow: 'hidden' }}>
+        <div style={{
+          height: '100%',
+          width: `${pct}%`,
+          background: `repeating-linear-gradient(90deg, ${C.progFill} 0, ${C.progFill} 8px, #fff 0, #fff 10px)`,
+          transition: 'width 1s linear',
+        }} />
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        {['0%', '50%', '100%'].map(m => (
+          <span key={m} style={{ fontSize: '7px', color: C.muted, fontFamily: FONT.main }}>{m}</span>
+        ))}
+      </div>
     </div>
   )
 }
@@ -158,79 +115,105 @@ export default function CreditWidget({ summary, title = 'Credit Buddy', updatedA
   const { requiredCredits, earnedCredits, remainingCredits, progressRate, major, liberalArts, currentSemester } = summary
   const pct = Math.min(progressRate, 100)
 
-  const year = new Date().getFullYear()
   const updatedTime = updatedAt
     ? new Date(updatedAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
     : null
 
-  const bgStyle = {
-    background: C.bg,
-    backgroundImage: `
-      linear-gradient(rgba(212,220,200,0.33) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(212,220,200,0.33) 1px, transparent 1px)
-    `,
-    backgroundSize: '20px 20px',
-    borderRadius: '12px',
-    fontFamily: FONT.data,
-    width: '290px',
-    boxSizing: 'border-box' as const,
-  }
-
   return (
-      <div style={{ ...bgStyle, padding: '16px' }}>
-        {/* Header — 타이틀 텍스트만 */}
-        <div style={{ marginBottom: '12px' }}>
-          <div style={{ fontSize: '9px', color: C.muted, fontFamily: FONT.deco, marginBottom: '3px' }}>
-            今日も、未来の自分のために。
-          </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-            <span style={{ fontSize: '18px', fontWeight: 900, color: C.accentDark, fontFamily: FONT.data }}>
-              {title}
-            </span>
-            <span style={{ fontSize: '9px', color: C.muted, border: `1px solid ${C.accentLight}`, borderRadius: '99px', padding: '1px 6px', fontFamily: FONT.data }}>
-              {year}
-            </span>
-          </div>
-          <div style={{ fontSize: '9px', color: C.muted, marginTop: '2px', fontFamily: FONT.deco }}>
-            캠퍼스 라이프를 정리하는 작은 습관
-          </div>
-        </div>
+    <div style={{ ...raised(2), background: C.bg, width: '290px', boxSizing: 'border-box' as const, fontFamily: FONT.main }}>
 
-        {/* Progress */}
-        <div style={{ background: C.card, border: `1px solid ${C.cardBorder}`, borderRadius: '8px', padding: '12px 14px', marginBottom: '10px' }}>
+      {/* Title Bar */}
+      <div style={{
+        background: `linear-gradient(180deg, #f1ffd7, #cfeaa3 45%, #9fca65)`,
+        borderBottom: `1px solid ${C.darkBorder}`,
+        height: '28px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '0 5px 0 8px',
+        flexShrink: 0,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span style={{ fontSize: '13px', filter: 'drop-shadow(1px 1px 0 #fff)' }}>🎓</span>
+          <span style={{ fontSize: '12px', fontWeight: 900, color: C.accentDark, letterSpacing: '0.5px', fontFamily: FONT.main, textShadow: '1px 1px 0 rgba(255,255,255,0.8)' }}>
+            {title}
+          </span>
+        </div>
+        <div style={{ display: 'flex', gap: '3px' }}>
+          <WinButton label="_" />
+          <WinButton label="□" />
+          <WinButton label="×" />
+        </div>
+      </div>
+
+      {/* Body */}
+      <div style={{ padding: '8px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+
+        {/* Progress Section */}
+        <div style={{ ...sunken(), background: C.card, padding: '8px 10px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
             <div>
-              <div style={{ fontSize: '10px', color: C.muted, marginBottom: '3px', fontFamily: FONT.data }}>졸업까지</div>
-              <div style={{ fontSize: '18px', fontWeight: 800, color: C.accentDark, lineHeight: 1, fontFamily: FONT.data }}>
+              <div style={{ fontSize: '9px', color: C.muted, fontFamily: FONT.main, marginBottom: '2px' }}>졸업까지</div>
+              <div style={{ fontSize: '16px', fontWeight: 900, color: C.accentDark, lineHeight: 1, fontFamily: FONT.main }}>
                 {remainingCredits}
-                <span style={{ fontSize: '11px', fontWeight: 600, color: C.muted }}> 학점 남았어요!</span>
+                <span style={{ fontSize: '10px', fontWeight: 700, color: C.muted }}> 학점 남았어요!</span>
               </div>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '7px', color: C.muted, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: FONT.data }}>GRADUATION</div>
-              <div style={{ fontSize: '24px', fontWeight: 700, fontFamily: FONT.data, color: C.accentMid, lineHeight: 1 }}>{pct}%</div>
+              <div style={{ fontSize: '7px', color: C.muted, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: FONT.main }}>GRADUATION</div>
+              <div style={{ fontSize: '22px', fontWeight: 900, fontFamily: FONT.main, color: C.accent, lineHeight: 1 }}>{pct}%</div>
             </div>
           </div>
-          <ProgressBar pct={pct} />
+          <Win98Progress pct={pct} />
         </div>
 
-        {/* Stats 2x2 */}
-        <div style={{ display: 'flex', gap: '7px', marginBottom: '7px' }}>
-          <StatCard icon="/icons/04-semester-complete-badge.png" label="전체 학점" earned={earnedCredits} required={requiredCredits} />
-          <StatCard icon="/icons/02-clover-note.png" label="전공 학점" earned={major.earned} required={major.required} />
-        </div>
-        <div style={{ display: 'flex', gap: '7px', marginBottom: '10px' }}>
-          <StatCard icon="/icons/04-clover-label.png" label="교양 학점" earned={liberalArts.earned} required={liberalArts.required} />
-          <StatCard icon="/icons/03-clover-medal.png" label="이번 학기 평점" earned={currentSemester?.gpa != null ? currentSemester.gpa.toFixed(2) : '—'} />
+        {/* 2x2 Stats */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px' }}>
+          <StatCard label="■ 전체 학점" earned={earnedCredits} required={requiredCredits} />
+          <StatCard label="■ 전공 학점" earned={major.earned} required={major.required} />
+          <StatCard label="■ 교양 학점" earned={liberalArts.earned} required={liberalArts.required} />
+          <StatCard label="■ 이번 학기 평점" earned={currentSemester?.gpa != null ? currentSemester.gpa.toFixed(2) : '—'} compact />
         </div>
 
-        {/* Status */}
-        <div style={{ background: C.card, border: `1px solid ${C.cardBorder}`, borderRadius: '8px', padding: '8px 12px', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '7px' }}>
-          <img src="/icons/01-clover.png" alt="" style={{ width: '15px', height: '15px', objectFit: 'contain', flexShrink: 0 }} />
-          <span style={{ fontSize: '10px', color: C.muted, fontFamily: FONT.deco }}>{getStatusMessage(remainingCredits)}</span>
+        {/* Status Message */}
+        <div style={{ ...sunken(), background: C.card, padding: '5px 8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span style={{ fontSize: '9px', color: C.accent, fontFamily: FONT.deco }}>
+            {getStatusMessage(remainingCredits)}
+          </span>
         </div>
 
-        <Footer updatedTime={updatedTime} />
       </div>
+
+      {/* Status Bar */}
+      <div style={{
+        borderTop: `1px solid #b0be90`,
+        background: C.statusBg,
+        height: '26px',
+        display: 'flex',
+        alignItems: 'center',
+        padding: '0 6px',
+        gap: '6px',
+      }}>
+        <div style={{
+          height: '19px', display: 'flex', alignItems: 'center', gap: '4px',
+          padding: '0 6px', flex: 1, overflow: 'hidden',
+          background: C.listBg, ...sunken(),
+        }}>
+          <span style={{ fontSize: '9px', color: C.muted, fontFamily: FONT.main, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {updatedTime ? `Last Updated: ${updatedTime}` : 'Credit Buddy'}
+          </span>
+        </div>
+        <div style={{
+          height: '19px', display: 'flex', alignItems: 'center',
+          padding: '0 6px', flexShrink: 0,
+          background: C.listBg, ...sunken(),
+        }}>
+          <span style={{ fontSize: '8px', color: C.accent, fontFamily: FONT.deco, letterSpacing: '0.3px' }}>
+            EVERY DAY IS A STEP FORWARD.
+          </span>
+        </div>
+      </div>
+
+    </div>
   )
 }
