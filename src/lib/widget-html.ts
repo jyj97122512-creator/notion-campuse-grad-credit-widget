@@ -65,7 +65,7 @@ export function renderWidgetHtml(summary: CreditSummary, title: string, updatedA
   const gpa = currentSemester?.gpa != null ? currentSemester.gpa.toFixed(2) : '—'
 
   const widget = `
-<div style="${raised(2)};background:${C.bg};width:290px;box-sizing:border-box;font-family:${FONT}">
+<div style="${raised(2)};background:${C.bg};width:min(290px,calc(100vw - 32px));max-width:290px;box-sizing:border-box;font-family:${FONT};overflow:hidden">
 
   <!-- Title Bar -->
   <div style="background:linear-gradient(180deg,#f1ffd7,#cfeaa3 45%,#9fca65);border-bottom:1px solid ${C.darkBorder};height:28px;display:flex;align-items:center;justify-content:space-between;padding:0 5px 0 8px;flex-shrink:0">
@@ -129,7 +129,7 @@ export function renderWidgetHtml(summary: CreditSummary, title: string, updatedA
 }
 
 const CSS = `
-  html,body{margin:0;padding:0;background:#eef3db;min-height:400px;overflow-y:visible;-webkit-text-size-adjust:none}
+  html,body{margin:0;padding:0;width:100%;min-width:0;background:#eef3db;min-height:400px;overflow-x:hidden;overflow-y:visible;-webkit-text-size-adjust:none;color-scheme:light}
   @font-face{font-family:DOSSaemmul;src:url('/fonts/DOSSaemmul.woff2') format('woff2'),url('/fonts/DOSSaemmul.ttf') format('truetype');font-display:swap}
   @font-face{font-family:ChosunGu;src:url('/fonts/ChosunGu.woff2') format('woff2'),url('/fonts/ChosunGu.ttf') format('truetype');font-display:swap}
 `
@@ -139,10 +139,10 @@ export function wrapHtmlDocument(body: string): string {
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>${CSS}</style>
 </head>
-<body><div style="padding:16px;min-height:380px;background:#eef3db;box-sizing:border-box;display:inline-block">${body}</div></body>
+<body><div style="padding:16px;min-height:380px;width:100%;min-width:0;background:#eef3db;box-sizing:border-box;display:flex;align-items:flex-start;justify-content:flex-start;overflow:hidden">${body}</div></body>
 </html>`
 }
 

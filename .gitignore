@@ -6,6 +6,7 @@ node_modules/
 out/
 build/
 *.log
+tsconfig.tsbuildinfo
 .DS_Store
 
 .vercel

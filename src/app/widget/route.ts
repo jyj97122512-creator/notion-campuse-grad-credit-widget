@@ -8,7 +8,18 @@ import { renderWidgetHtml, wrapHtmlDocument, errorHtmlDocument } from '@/lib/wid
 const HEADERS = {
   'Content-Type': 'text/html; charset=utf-8',
   'Content-Security-Policy': 'frame-ancestors *',
-  'Cache-Control': 'private, no-cache, no-store',
+  'Cache-Control': 'private, no-cache, no-store, max-age=0, must-revalidate, no-transform',
+}
+
+function isConfigError(err: any) {
+  const msg = err?.message ?? ''
+  return (
+    msg.includes('bad decrypt') ||
+    msg.includes('Unsupported state') ||
+    msg.includes('authenticate data') ||
+    msg.includes('authentication tag') ||
+    msg.includes('Invalid initialization vector')
+  )
 }
 
 export async function GET(request: NextRequest) {
@@ -53,10 +64,10 @@ export async function GET(request: NextRequest) {
     return new NextResponse(wrapHtmlDocument(widgetHtml), { headers: HEADERS })
 
   } catch (err: any) {
-    const isDecryptError = err?.message?.includes('bad decrypt') || err?.message?.includes('Unsupported state')
+    const isDecryptError = isConfigError(err)
     return new NextResponse(
       errorHtmlDocument(isDecryptError ? '설정이 만료되었거나 올바르지 않습니다.' : '데이터를 불러오지 못했습니다.'),
-      { status: isDecryptError ? 400 : 500, headers: HEADERS }
+      { headers: HEADERS }
     )
   }
 }
